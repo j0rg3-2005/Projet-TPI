@@ -1,0 +1,147 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace TPI
+{
+    public partial class frmSignUp : Form
+    {
+        public frmSignUp()
+        {
+            InitializeComponent();
+        }
+
+        private void frmSignUp_Load(object sender, EventArgs e)
+        {
+            this.Text = "Inscription";
+            this.Size = new Size(400, 500);
+            this.StartPosition = FormStartPosition.CenterScreen;
+
+            Panel pnlInscription = new Panel
+            {
+                Size = new Size(300, 400),
+                Location = new Point((this.ClientSize.Width - 300) / 2, (this.ClientSize.Height - 400) / 2),
+                Anchor = AnchorStyles.None
+            };
+            this.Controls.Add(pnlInscription);
+
+            // Message de bienvenue
+            Label lblWelcome = new Label
+            {
+                Text = "Créer un compte\nVeuillez remplir le formulaire ci-dessous.",
+                Size = new Size(280, 40),
+                Location = new Point(10, 0),
+                TextAlign = ContentAlignment.MiddleCenter
+            };
+            pnlInscription.Controls.Add(lblWelcome);
+
+            // Label Prénom
+            Label lblPrenom = new Label
+            {
+                Text = "Prénom",
+                AutoSize = true,
+                Location = new Point(10, 50)
+            };
+            pnlInscription.Controls.Add(lblPrenom);
+
+            TextBox txtPrenom = new TextBox
+            {
+                Width = 250,
+                Location = new Point(10, 70)
+            };
+            pnlInscription.Controls.Add(txtPrenom);
+
+            // Label Nom
+            Label lblNom = new Label
+            {
+                Text = "Nom",
+                AutoSize = true,
+                Location = new Point(10, 110)
+            };
+            pnlInscription.Controls.Add(lblNom);
+
+            TextBox txtNom = new TextBox
+            {
+                Width = 250,
+                Location = new Point(10, 130)
+            };
+            pnlInscription.Controls.Add(txtNom);
+
+            // Label Email
+            Label lblEmail = new Label
+            {
+                Text = "Adresse mail",
+                AutoSize = true,
+                Location = new Point(10, 170)
+            };
+            pnlInscription.Controls.Add(lblEmail);
+
+            TextBox txtEmail = new TextBox
+            {
+                Width = 250,
+                Location = new Point(10, 190)
+            };
+            pnlInscription.Controls.Add(txtEmail);
+
+            // Label Mot de passe
+            Label lblPassword = new Label
+            {
+                Text = "Mot de passe",
+                AutoSize = true,
+                Location = new Point(10, 230)
+            };
+            pnlInscription.Controls.Add(lblPassword);
+
+            TextBox txtPassword = new TextBox
+            {
+                Width = 250,
+                Location = new Point(10, 250),
+                UseSystemPasswordChar = true
+            };
+            pnlInscription.Controls.Add(txtPassword);
+
+            // Bouton S'inscrire
+            Button btnRegister = new Button
+            {
+                Text = "S'inscrire",
+                Width = 250,
+                Location = new Point(10, 290)
+            };
+            pnlInscription.Controls.Add(btnRegister);
+
+            // Message se connecter
+            Label lblLoginMsg = new Label
+            {
+                Text = "Déjà un compte ? Connectez-vous ci-dessous.",
+                Size = new Size(280, 30),
+                Location = new Point(10, 330),
+                TextAlign = ContentAlignment.MiddleCenter
+            };
+            pnlInscription.Controls.Add(lblLoginMsg);
+
+            // Bouton Se connecter
+            Button btnLogin = new Button
+            {
+                Text = "Se connecter",
+                Width = 250,
+                Location = new Point(10, 360)
+            };
+            btnLogin.Click += btnLogin_Click;
+            pnlInscription.Controls.Add(btnLogin);
+        }
+        private void btnLogin_Click(object sender, EventArgs e)
+        {
+            frmconnection frmconnection = new frmconnection();
+            frmconnection.Show();
+            this.Hide();
+            frmconnection.FormClosed += (s, args) => this.Show();
+        }
+    }
+}
+
