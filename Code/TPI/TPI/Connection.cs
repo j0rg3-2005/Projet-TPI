@@ -6,6 +6,9 @@ namespace TPI
 {
     public partial class frmconnection : Form
     {
+        private TextBox txtEmail;
+        private TextBox txtPassword;
+
         public frmconnection()
         {
             InitializeComponent();
@@ -42,7 +45,7 @@ namespace TPI
             };
             pnlConnection.Controls.Add(lblEmail);
 
-            TextBox txtEmail = new TextBox
+            txtEmail = new TextBox
             {
                 Width = 200,
                 Location = new Point(90, 50)
@@ -57,7 +60,7 @@ namespace TPI
             };
             pnlConnection.Controls.Add(lblPassword);
 
-            TextBox txtPassword = new TextBox
+            txtPassword = new TextBox
             {
                 Width = 200,
                 Location = new Point(90, 90),
@@ -71,6 +74,7 @@ namespace TPI
                 Width = 250,
                 Location = new Point(10, 130)
             };
+            btnLogin.Click += btnLogin_Click; // Ajout de l'événement
             pnlConnection.Controls.Add(btnLogin);
 
             Label lblSignUp = new Label
@@ -89,6 +93,23 @@ namespace TPI
             };
             btnSignUp.Click += btnSignUp_Click;
             pnlConnection.Controls.Add(btnSignUp);
+        }
+
+        private void btnLogin_Click(object sender, EventArgs e)
+        {
+            if (Tables.Users.ConnectionSuccessfull(txtEmail.Text, txtPassword.Text))
+            {
+                MessageBox.Show("Connexion réussie !", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                frmClient frmClient = new frmClient();
+                frmClient.Show();
+                this.Hide();
+                frmClient.FormClosed += (s, args) => this.Show();
+            }
+            else
+            {
+                MessageBox.Show("Email ou mot de passe incorrect.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void btnSignUp_Click(object sender, EventArgs e)

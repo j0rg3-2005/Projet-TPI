@@ -1,17 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using TPI.Tables;
 
 namespace TPI
 {
     public partial class frmSignUp : Form
     {
+        // Déclarer les variables de champ pour les contrôles de formulaire
+        private TextBox txtPrenom;
+        private TextBox txtNom;
+        private TextBox txtEmail;
+        private TextBox txtPassword;
+
         public frmSignUp()
         {
             InitializeComponent();
@@ -50,7 +48,7 @@ namespace TPI
             };
             pnlInscription.Controls.Add(lblPrenom);
 
-            TextBox txtPrenom = new TextBox
+            txtPrenom = new TextBox
             {
                 Width = 250,
                 Location = new Point(10, 70)
@@ -66,7 +64,7 @@ namespace TPI
             };
             pnlInscription.Controls.Add(lblNom);
 
-            TextBox txtNom = new TextBox
+            txtNom = new TextBox
             {
                 Width = 250,
                 Location = new Point(10, 130)
@@ -82,7 +80,7 @@ namespace TPI
             };
             pnlInscription.Controls.Add(lblEmail);
 
-            TextBox txtEmail = new TextBox
+            txtEmail = new TextBox
             {
                 Width = 250,
                 Location = new Point(10, 190)
@@ -98,7 +96,7 @@ namespace TPI
             };
             pnlInscription.Controls.Add(lblPassword);
 
-            TextBox txtPassword = new TextBox
+            txtPassword = new TextBox
             {
                 Width = 250,
                 Location = new Point(10, 250),
@@ -113,6 +111,7 @@ namespace TPI
                 Width = 250,
                 Location = new Point(10, 290)
             };
+            btnRegister.Click += BtnRegister_Click; // Attacher l'événement click
             pnlInscription.Controls.Add(btnRegister);
 
             // Message se connecter
@@ -135,6 +134,7 @@ namespace TPI
             btnLogin.Click += btnLogin_Click;
             pnlInscription.Controls.Add(btnLogin);
         }
+
         private void btnLogin_Click(object sender, EventArgs e)
         {
             frmconnection frmconnection = new frmconnection();
@@ -142,6 +142,21 @@ namespace TPI
             this.Hide();
             frmconnection.FormClosed += (s, args) => this.Show();
         }
+
+        // Méthode appelée lors du clic sur "S'inscrire"
+        private void BtnRegister_Click(object sender, EventArgs e)
+        {
+            // Récupérer les valeurs des champs
+            string prenom = txtPrenom.Text;
+            string nom = txtNom.Text;
+            string email = txtEmail.Text;
+            string motDePasse = txtPassword.Text;
+
+            // Appeler la méthode pour enregistrer l'utilisateur
+            string resultMessage = Users.RegisterUser(prenom, nom, email, motDePasse);
+
+            // Afficher un message en fonction du résultat
+            MessageBox.Show(resultMessage);
+        }
     }
 }
-
