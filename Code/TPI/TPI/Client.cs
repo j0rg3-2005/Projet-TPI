@@ -26,6 +26,9 @@ namespace TPI
             this.Padding = new Padding(paddingMargin);
             this.Controls.Add(btnBack);
 
+            lblRole = new Label();
+            lblRole.text = "Bienvenue" + 
+
             txtSearch = new TextBox();
             txtSearch.Width = 250;
             txtSearch.PlaceholderText = "Rechercher un équipement...";

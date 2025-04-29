@@ -14,6 +14,13 @@ namespace TPI
             InitializeComponent();
         }
 
+        public static class Session
+        {
+            public static string Email { get; set; }
+            public static string Role { get; set; }
+            public static int UserId { get; set; }
+        }
+
         private void frmconnection_Load(object sender, EventArgs e)
         {
             this.Text = "Connexion";
@@ -97,8 +104,14 @@ namespace TPI
 
         private void btnLogin_Click(object sender, EventArgs e)
         {
-            if (Tables.Users.ConnectionSuccessfull(txtEmail.Text, txtPassword.Text))
+            // Exemple si tu modifies ConnectionSuccessfull pour renvoyer un objet utilisateur
+            var user = Tables.Users.GetUser(txtEmail.Text, txtPassword.Text);
+            if (user != null)
             {
+                Session.Email = user.Email;
+                Session.Role = user.Role;
+                Session.UserId = user.Id;
+
                 MessageBox.Show("Connexion réussie !", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 frmClient frmClient = new frmClient();
@@ -110,6 +123,7 @@ namespace TPI
             {
                 MessageBox.Show("Email ou mot de passe incorrect.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+
         }
 
         private void btnSignUp_Click(object sender, EventArgs e)
