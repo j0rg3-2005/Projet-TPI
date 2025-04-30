@@ -16,10 +16,10 @@ INSERT INTO categories (name, type) VALUES
 INSERT INTO users (lastName, firstName, email, password, role) VALUES
 ('Dupont', 'Jean', 'jean.dupont@example.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'client'),
 ('Durand', 'Sophie', 'sophie.durand@example.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'client'),
-('Martin', 'Paul', 'paul.martin@example.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'Administrator'),
-('Moreau', 'Emma', 'emma.moreau@example.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'Administrator'),
+('Martin', 'Paul', 'paul.martin@example.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'Administrateur'),
+('Moreau', 'Emma', 'emma.moreau@example.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'Administrateur'),
 ('Bernard', 'Lucie', 'lucie.bernard@example.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'client'),
-('Petit', 'Hugo', 'hugo.petit@example.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'Administrator');
+('Petit', 'Hugo', 'hugo.petit@example.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'Administrateur');
 
 -- Insertion de matériels disponibles
 INSERT INTO equipment (model, available, serialNumber, inventoryNumber, categoryId) VALUES
@@ -44,9 +44,9 @@ INSERT INTO consumables (model, stock, minStock, categoryId) VALUES
 ('Transistor 2N2222', 200, 150, 8);
 
 -- Création d'emprunts de matériel
-INSERT INTO borrow (status, startDate, endDate, requestDate, userId, equipmentId) VALUES
-('en cours', '2025-04-25 09:00:00', NULL, '2025-04-24 08:30:00', 1, 1),
-('en cours', '2025-04-25 09:30:00', NULL, '2025-04-24 09:00:00', 2, 3),
+INSERT INTO lends (status, startDate, endDate, requestDate, userId, equipmentId) VALUES
+('en cours', '2025-04-25 09:00:00', '2025-04-30 09:00:00', '2025-04-24 08:30:00', 1, 1),
+('en cours', '2025-04-25 09:30:00', '2025-04-30 09:00:00', '2025-04-24 09:00:00', 2, 3),
 ('retourné', '2025-04-10 10:00:00', '2025-04-17 10:00:00', '2025-04-09 09:00:00', 5, 5),
 ('retourné', '2025-04-05 11:00:00', '2025-04-10 15:00:00', '2025-04-04 10:30:00', 6, 7);
 

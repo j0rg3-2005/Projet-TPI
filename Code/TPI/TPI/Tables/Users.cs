@@ -55,7 +55,7 @@ namespace TPI.Tables
                     return "Cet email est déjà utilisé.";
                 }
 
-                string insertQuery = "INSERT INTO users (firstname, lastname, email, password, role) VALUES (@FirstName, @LastName, @Email, @Password, 'user')";
+                string insertQuery = "INSERT INTO users (firstname, lastname, email, password, role) VALUES (@FirstName, @LastName, @Email, @Password, 'client')";
                 MySqlCommand cmd = new MySqlCommand(insertQuery, Program.conn);
 
                 cmd.Parameters.AddWithValue("@FirstName", firstName);
@@ -92,6 +92,34 @@ namespace TPI.Tables
             object result = cmd.ExecuteScalar();
 
             return result != null && Convert.ToInt32(result) > 0;
+        }
+
+        public static Users GetUser(string email, string password)
+        {
+            string hashedPassword = HashPassword(password);
+            string query = "SELECT * FROM users WHERE email = @Email AND password = @Password";
+
+            MySqlCommand cmd = new MySqlCommand(query, Program.conn);
+            cmd.Parameters.AddWithValue("@Email", email);
+            cmd.Parameters.AddWithValue("@Password", hashedPassword);
+
+            using (MySqlDataReader reader = cmd.ExecuteReader())
+            {
+                if (reader.Read())
+                {
+                    return new Users
+                    {
+                        Id = Convert.ToInt32(reader["id"]),
+                        FirstName = reader["firstname"].ToString(),
+                        LastName = reader["lastname"].ToString(),
+                        Email = reader["email"].ToString(),
+                        Password = reader["password"].ToString(),
+                        Role = reader["role"].ToString()
+                    };
+                }
+            }
+
+            return null;
         }
 
         // Récupérer tous les utilisateurs

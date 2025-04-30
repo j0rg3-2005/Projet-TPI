@@ -1,6 +1,8 @@
 using System;
+using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 
 namespace TPI
 {
@@ -12,13 +14,6 @@ namespace TPI
         public frmconnection()
         {
             InitializeComponent();
-        }
-
-        public static class Session
-        {
-            public static string Email { get; set; }
-            public static string Role { get; set; }
-            public static int UserId { get; set; }
         }
 
         private void frmconnection_Load(object sender, EventArgs e)
@@ -81,7 +76,7 @@ namespace TPI
                 Width = 250,
                 Location = new Point(10, 130)
             };
-            btnLogin.Click += btnLogin_Click; // Ajout de l'événement
+            btnLogin.Click += btnLogin_Click;
             pnlConnection.Controls.Add(btnLogin);
 
             Label lblSignUp = new Label
@@ -104,10 +99,11 @@ namespace TPI
 
         private void btnLogin_Click(object sender, EventArgs e)
         {
-            // Exemple si tu modifies ConnectionSuccessfull pour renvoyer un objet utilisateur
             var user = Tables.Users.GetUser(txtEmail.Text, txtPassword.Text);
             if (user != null)
             {
+                Session.FirstName = user.FirstName;
+                Session.LastName = user.LastName;
                 Session.Email = user.Email;
                 Session.Role = user.Role;
                 Session.UserId = user.Id;
@@ -117,13 +113,16 @@ namespace TPI
                 frmClient frmClient = new frmClient();
                 frmClient.Show();
                 this.Hide();
-                frmClient.FormClosed += (s, args) => this.Show();
+                frmClient.FormClosed += (s, args) =>
+                {
+                    this.Show();
+                    Session.Clear();
+                };
             }
             else
             {
                 MessageBox.Show("Email ou mot de passe incorrect.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
         }
 
         private void btnSignUp_Click(object sender, EventArgs e)

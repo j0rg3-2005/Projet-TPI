@@ -7,6 +7,7 @@ namespace TPI
         TextBox txtSelectedEquipmentId;
         TableLayoutPanel tblEquipment;
         FlowLayoutPanel flpMain;
+        Label lblRole;
         Button btnBack;
         Button btnShowEquipment;
         Button btnShowConsummables;
@@ -14,6 +15,17 @@ namespace TPI
         int paddingMargin = 15;
         TextBox txtSearch;
         Button btnSearch;
+
+
+        ComboBox cmbModel;
+        TextBox txtInventoryNumber;
+        TextBox txtSerialNumber;
+        ComboBox cmbCategory;
+
+
+        private enum ViewMode { Equipment, Consumables }
+        private ViewMode currentView = ViewMode.Equipment;
+
 
         public frmClient()
         {
@@ -27,7 +39,11 @@ namespace TPI
             this.Controls.Add(btnBack);
 
             lblRole = new Label();
-            lblRole.text = "Bienvenue" + 
+            lblRole.Text = "Bonjour " + Session.Role + " " + Session.FirstName + " " + Session.LastName + " !";
+            lblRole.Top = paddingMargin;
+            lblRole.Left = (paddingMargin * 2);
+            lblRole.AutoSize = true;
+            this.Controls.Add(lblRole);
 
             txtSearch = new TextBox();
             txtSearch.Width = 250;
@@ -95,45 +111,98 @@ namespace TPI
             pnlAddEquipment.AutoScroll = true;
             pnlAddEquipment.BorderStyle = BorderStyle.FixedSingle;
 
-            Label lblModel = new Label() { Text = "Modèle:", Left = 10, Top = 20 };
-            lblModel.AutoSize = true;
-            TextBox txtModel = new TextBox() { Left = lblModel.Width + 50, Top = 20, Width = 200 };
+            // Modèle
+            Label lblModel = new Label() { Text = "Modèle:", Left = 10, Top = 50, AutoSize = true };
+            cmbModel = new ComboBox() { Left = 120, Top = 50, Width = 200 };
+            cmbModel.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbModel.Enabled = false;
 
-            Label lblInventoryNumber = new Label() { Text = "Numéro d'inventaire:", Left = 10, Top = 50 };
-            lblInventoryNumber.AutoSize = true;
-            TextBox txtInventoryNumber = new TextBox() { Left = lblInventoryNumber.Width + 50, Top = 50, Width = 200 };
+            Label lblStartDate = new Label() { Text = "Date de début:", Left = 10, Top = 80 };
+            lblStartDate.AutoSize = true;
+            DateTimePicker dtpStartDate = new DateTimePicker() { Left = 120, Top = 80, Width = 200, Format = DateTimePickerFormat.Short };
 
-            Label lblSerialNumber = new Label() { Text = "Numéro de série:", Left = 10, Top = 80 };
-            lblSerialNumber.AutoSize = true;
-            TextBox txtSerialNumber = new TextBox() { Left = lblSerialNumber.Width + 50, Top = 80, Width = 200 };
 
-            Label lblCategory = new Label() { Text = "Catégorie ID:", Left = 10, Top = 110 };
-            lblCategory.AutoSize = true;
-            TextBox txtCategory = new TextBox() { Left = lblCategory.Width + 50, Top = 110, Width = 200 };
+            Label lblEndDate = new Label() { Text = "Date de fin :", Left = 10, Top = 110 };
+            lblEndDate.AutoSize = true;
+            DateTimePicker dtpEndDate = new DateTimePicker() { Left = 120, Top = 110, Width = 200, Format = DateTimePickerFormat.Short };
+
+
+            dtpStartDate.ValueChanged += (s, e) =>
+            {
+                if (dtpEndDate.Value < dtpStartDate.Value)
+                {
+                    dtpEndDate.Value = dtpStartDate.Value;
+                }
+            };
+            dtpEndDate.ValueChanged += (s, e) =>
+            {
+                if (dtpEndDate.Value < dtpStartDate.Value)
+                {
+                    MessageBox.Show("La date de fin ne peut pas être avant la date de début.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    dtpEndDate.Value = dtpStartDate.Value;
+                }
+            };
+
+            Label lblCategory = new Label() { Text = "Catégorie :", Left = 10, Top = 20, AutoSize = true };
+            cmbCategory = new ComboBox() { Left = 120, Top = 20, Width = 200 };
+            cmbCategory.DropDownStyle = ComboBoxStyle.DropDownList;
+            List<Category> categories = Category.GetAllEquipment();
+            foreach (var category in categories)
+            {
+                cmbCategory.Items.Add((category.Name));
+            }
+            cmbCategory.SelectedIndexChanged += (s, ev) =>
+            {
+                cmbModel.Enabled = true;
+                cmbModel.Items.Clear();
+                List<Equipment> equipmentByCategory = Equipment.Search(cmbCategory.SelectedItem.ToString());
+                foreach (var equipment in equipmentByCategory)
+                {
+                    cmbModel.Items.Add(equipment.Model);
+                }
+                cmbCategory.SelectedIndexChanged += (s, ev) =>
+                {
+                    cmbModel.Enabled = true;
+                };
+            };
+
 
             Button btnSubmit = new Button() { Text = "Soumettre", Left = 120, Top = 150 };
 
             btnSubmit.Click += (sender, e) =>
             {
-                Equipment.AddEquipment(txtModel, txtInventoryNumber, txtSerialNumber, txtCategory);
+                if (cmbCategory.SelectedItem == null)
+                {
+                    MessageBox.Show("Veuillez sélectionner une catégorie.");
+                    return;
+                }
 
-                txtModel.Clear();
+
+
+
+                cmbModel.SelectedIndex = -1;
                 txtInventoryNumber.Clear();
                 txtSerialNumber.Clear();
-                txtCategory.Clear();
+                cmbCategory.SelectedIndex = -1;
+
+                cmbModel.SelectedIndex = -1;
+                txtInventoryNumber.Enabled = false;
+                txtSerialNumber.Enabled = false;
             };
 
+            pnlAddEquipment.Controls.Add(lblEndDate);
+            pnlAddEquipment.Controls.Add(dtpEndDate);
             pnlAddEquipment.Controls.Add(lblModel);
-            pnlAddEquipment.Controls.Add(txtModel);
-            pnlAddEquipment.Controls.Add(lblInventoryNumber);
+            pnlAddEquipment.Controls.Add(cmbModel);
+            pnlAddEquipment.Controls.Add(lblStartDate);
+            pnlAddEquipment.Controls.Add(dtpStartDate);
             pnlAddEquipment.Controls.Add(txtInventoryNumber);
-            pnlAddEquipment.Controls.Add(lblSerialNumber);
             pnlAddEquipment.Controls.Add(txtSerialNumber);
             pnlAddEquipment.Controls.Add(lblCategory);
-            pnlAddEquipment.Controls.Add(txtCategory);
             pnlAddEquipment.Controls.Add(btnSubmit);
+            pnlAddEquipment.Controls.Add(cmbCategory);
 
-            List<Equipment> equipments = Equipment.GetAll();
+            List<Equipment> equipments = Equipment.GetAllAvailableEquipment();
             AddEquipmentsToTable(equipments);
         }
 
@@ -162,7 +231,7 @@ namespace TPI
                     "\r\n\r\n- Modèle : " + equipment.Model +
                     "\r\n\r\n- Numéro d'inventaire : " + equipment.InventoryNumber +
                     "\r\n\r\n- Numéro de série : " + equipment.SerialNumber +
-                    "\r\n\r\n- Catégorie ID : " + equipment.CategoryId.ToString() +
+                    "\r\n\r\n- Catégorie : " + equipment.CategoryId.ToString() +
                     "\r\n\r\n- Disponible : " + (equipment.Available ? "Oui" : "Non");
                 };
 
@@ -225,19 +294,36 @@ namespace TPI
         private void BtnSearch_Click(object sender, EventArgs e)
         {
             string searchTerm = txtSearch.Text.Trim();
-            List<Equipment> filteredEquipments = Equipment.Search(searchTerm);
-            AddEquipmentsToTable(filteredEquipments);
+
+            if (string.IsNullOrWhiteSpace(searchTerm))
+                return;
+
+            if (currentView == ViewMode.Equipment)
+            {
+                List<Equipment> filteredEquipments = Equipment.Search(searchTerm);
+                flpMain.Controls.Clear();
+                AddEquipmentsToTable(filteredEquipments);
+            }
+            else if (currentView == ViewMode.Consumables)
+            {
+                List<Consumables> filteredConsumables = Consumables.Search(searchTerm);
+                flpMain.Controls.Clear();
+                AddConsumablesToTable(filteredConsumables);
+            }
         }
+
 
         private void btnShowEquipment_Click(object sender, EventArgs e)
         {
-            List<Equipment> equipments = Equipment.GetAll();
+            currentView = ViewMode.Equipment;
+            List<Equipment> equipments = Equipment.GetAllAvailableEquipment();
             flpMain.Controls.Clear();
             AddEquipmentsToTable(equipments);
         }
 
         private void btnShowConsummables_Click(object sender, EventArgs e)
         {
+            currentView = ViewMode.Consumables;
             List<Consumables> consumables = Consumables.GetAll();
             flpMain.Controls.Clear();
             AddConsumablesToTable(consumables);

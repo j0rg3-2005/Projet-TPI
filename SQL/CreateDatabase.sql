@@ -41,12 +41,12 @@ CREATE TABLE IF NOT EXISTS consumables (
 );
 
 -- Borrow table (equipment loan)
-CREATE TABLE IF NOT EXISTS borrow (
+CREATE TABLE IF NOT EXISTS lends (
     id INT PRIMARY KEY AUTO_INCREMENT,
     status TEXT NOT NULL,
-    startDate DATETIME,
-    endDate DATETIME,
-    requestDate DATETIME,
+    startDate DATETIME NOT NULL,
+    endDate DATETIME NOT NULL,
+    requestDate DATETIME NOT NULL,
     userId INT,
     equipmentId INT,
     FOREIGN KEY (userId) REFERENCES users(id),
@@ -57,8 +57,8 @@ CREATE TABLE IF NOT EXISTS borrow (
 CREATE TABLE IF NOT EXISTS request (
     id INT PRIMARY KEY AUTO_INCREMENT,
     status TEXT NOT NULL,
-    requestDate DATETIME,
-    consumableQuantity INT,
+    requestDate DATETIME NOT NULL,
+    consumableQuantity INT NOT NULL,
     userId INT,
     consumableId INT,
     FOREIGN KEY (userId) REFERENCES users(id),
