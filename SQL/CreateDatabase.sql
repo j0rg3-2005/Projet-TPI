@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS request (
     id INT PRIMARY KEY AUTO_INCREMENT,
     status TEXT NOT NULL,
     requestDate DATETIME NOT NULL,
-    consumableQuantity INT NOT NULL,
+    consumableQuantity INT NOT NULL	,
     userId INT,
     consumableId INT,
     FOREIGN KEY (userId) REFERENCES users(id),

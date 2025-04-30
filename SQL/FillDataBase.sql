@@ -23,9 +23,9 @@ INSERT INTO users (lastName, firstName, email, password, role) VALUES
 
 -- Insertion de matériels disponibles
 INSERT INTO equipment (model, available, serialNumber, inventoryNumber, categoryId) VALUES
-('Chargeur Anker 65W', TRUE, 'SNCHARGER01', 'INV001', 1),
+('Chargeur Anker 65W', False, 'SNCHARGER01', 'INV001', 1),
 ('Chargeur Samsung 25W', TRUE, 'SNCHARGER02', 'INV002', 1),
-('Dell Latitude 5410', TRUE, 'SNLAPTOP01', 'INV003', 2),
+('Dell Latitude 5410', FALSE, 'SNLAPTOP01', 'INV003', 2),
 ('MacBook Air M1', TRUE, 'SNLAPTOP02', 'INV004', 2),
 ('Arduino Uno', TRUE, 'SNARDUINO01', 'INV005', 3),
 ('Arduino Mega 2560', TRUE, 'SNARDUINO02', 'INV006', 3),

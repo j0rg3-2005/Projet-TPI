@@ -1,4 +1,5 @@
-﻿using TPI.Tables;
+﻿using Microsoft.VisualBasic.ApplicationServices;
+using TPI.Tables;
 
 namespace TPI
 {
@@ -6,6 +7,7 @@ namespace TPI
     {
         TextBox txtSelectedEquipmentId;
         TableLayoutPanel tblEquipment;
+        TableLayoutPanel tblCart;
         FlowLayoutPanel flpMain;
         Label lblRole;
         Button btnBack;
@@ -32,11 +34,26 @@ namespace TPI
             InitializeComponent();
         }
 
+        public class ComboBoxItem
+        {
+            public int Id { get; set; }
+            public string DisplayText { get; set; }
+
+            public ComboBoxItem(int id, string displayText)
+            {
+                Id = id;
+                DisplayText = displayText;
+            }
+            public override string ToString() => DisplayText;
+        }
+
         private void frmClient_Load(object sender, EventArgs e)
         {
             this.WindowState = FormWindowState.Maximized;
             this.Padding = new Padding(paddingMargin);
             this.Controls.Add(btnBack);
+
+            Equipment.verifyState();
 
             lblRole = new Label();
             lblRole.Text = "Bonjour " + Session.Role + " " + Session.FirstName + " " + Session.LastName + " !";
@@ -94,7 +111,6 @@ namespace TPI
             txtSelectedEquipmentId.Width = (int)(flpMain.Width * 0.3) - (2 * paddingMargin);
             txtSelectedEquipmentId.Height = flpMain.Height - (4 * paddingMargin);
 
-
             tblEquipment = new TableLayoutPanel();
             tblEquipment.Dock = DockStyle.Fill;
             tblEquipment.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
@@ -105,13 +121,14 @@ namespace TPI
             tblEquipment.RowCount = 0;
             tblEquipment.AutoScroll = true;
 
+
             pnlAddEquipment = new Panel();
             pnlAddEquipment.Width = (int)(flpMain.Width * 0.3) - (2 * paddingMargin);
             pnlAddEquipment.Height = flpMain.Height - (4 * paddingMargin);
             pnlAddEquipment.AutoScroll = true;
             pnlAddEquipment.BorderStyle = BorderStyle.FixedSingle;
+            pnlAddEquipment.AutoSize = false;
 
-            // Modèle
             Label lblModel = new Label() { Text = "Modèle:", Left = 10, Top = 50, AutoSize = true };
             cmbModel = new ComboBox() { Left = 120, Top = 50, Width = 200 };
             cmbModel.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -155,40 +172,48 @@ namespace TPI
             {
                 cmbModel.Enabled = true;
                 cmbModel.Items.Clear();
-                List<Equipment> equipmentByCategory = Equipment.Search(cmbCategory.SelectedItem.ToString());
-                foreach (var equipment in equipmentByCategory)
+                if (cmbCategory.SelectedIndex != -1)
                 {
-                    cmbModel.Items.Add(equipment.Model);
-                }
-                cmbCategory.SelectedIndexChanged += (s, ev) =>
-                {
-                    cmbModel.Enabled = true;
-                };
-            };
+                    List<Equipment> equipmentByCategory = Equipment.Search(cmbCategory.SelectedItem.ToString());
+                    foreach (var equipment in equipmentByCategory)
+                    {
+                        cmbModel.Items.Add(new ComboBoxItem(equipment.Id, equipment.Model));
+                    }
 
+                    cmbCategory.SelectedIndexChanged += (s, ev) =>
+                    {
+                        cmbModel.Enabled = true;
+                    };
+                }
+            };
 
             Button btnSubmit = new Button() { Text = "Soumettre", Left = 120, Top = 150 };
 
             btnSubmit.Click += (sender, e) =>
             {
-                if (cmbCategory.SelectedItem == null)
+                var selectedItem = cmbModel.SelectedItem as ComboBoxItem;
+
+                int itemId = selectedItem?.Id ?? 0;
+
+                if (cmbCategory.SelectedItem == null || cmbModel.SelectedItem == null)
                 {
-                    MessageBox.Show("Veuillez sélectionner une catégorie.");
+                    MessageBox.Show("Veuillez sélectionner une catégorie et un matériel.");
                     return;
                 }
-
-
-
-
-                cmbModel.SelectedIndex = -1;
-                txtInventoryNumber.Clear();
-                txtSerialNumber.Clear();
-                cmbCategory.SelectedIndex = -1;
-
-                cmbModel.SelectedIndex = -1;
-                txtInventoryNumber.Enabled = false;
-                txtSerialNumber.Enabled = false;
+                else
+                {
+                    Lends.Add(dtpStartDate.Value, dtpEndDate.Value, DateTime.Today, Session.UserId, itemId);
+                    cmbModel.SelectedIndex = -1;
+                    cmbCategory.SelectedIndex = -1;
+                }
             };
+
+            tblCart = new TableLayoutPanel();
+            tblCart.Dock = DockStyle.Fill;
+            tblCart.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
+            tblCart.Location = new Point(btnSubmit.Left, btnSubmit.Bottom + 10);
+            tblCart.AutoScroll = true;
+            tblCart.AutoSize = false;
 
             pnlAddEquipment.Controls.Add(lblEndDate);
             pnlAddEquipment.Controls.Add(dtpEndDate);
@@ -201,6 +226,7 @@ namespace TPI
             pnlAddEquipment.Controls.Add(lblCategory);
             pnlAddEquipment.Controls.Add(btnSubmit);
             pnlAddEquipment.Controls.Add(cmbCategory);
+            pnlAddEquipment.Controls.Add(tblCart);
 
             List<Equipment> equipments = Equipment.GetAllAvailableEquipment();
             AddEquipmentsToTable(equipments);
@@ -242,7 +268,6 @@ namespace TPI
             tblEquipment.RowCount++;
             tblEquipment.Controls.Add(new Label(), 0, tblEquipment.RowCount);
             tblEquipment.Controls.Add(new Label(), 1, tblEquipment.RowCount);
-
             flpMain.Controls.Add(txtSelectedEquipmentId);
             flpMain.Controls.Add(tblEquipment);
             flpMain.Controls.Add(pnlAddEquipment);

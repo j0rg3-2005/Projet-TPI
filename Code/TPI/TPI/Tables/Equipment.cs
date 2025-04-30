@@ -50,7 +50,7 @@ namespace TPI.Tables
 
             try
             {
-                string query = "SELECT * FROM equipment";
+                string query = "SELECT * FROM equipment WHERE available = true";
                 MySqlCommand cmd = new MySqlCommand(query, Program.conn);
                 MySqlDataReader reader = cmd.ExecuteReader();
 
@@ -77,10 +77,77 @@ namespace TPI.Tables
             return equipmentList;
         }
 
+        public static void verifyState()
+        {
+            try
+            {
+                // On récupère tous les équipements qui sont en prêt
+                string queryLends = @"
+            SELECT DISTINCT equipmentId 
+            FROM lends 
+            WHERE status IN ('en cours', 'en attente d''approbation')";
+                HashSet<int> lentEquipments = new HashSet<int>();
+
+                using (MySqlCommand cmd = new MySqlCommand(queryLends, Program.conn))
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        lentEquipments.Add(reader.GetInt32("equipmentId"));
+                    }
+                }
+
+                // On récupère tous les équipements de la table
+                string getAllEquipmentsQuery = "SELECT id FROM equipment";
+                List<int> allEquipments = new List<int>();
+
+                using (MySqlCommand cmd = new MySqlCommand(getAllEquipmentsQuery, Program.conn))
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        allEquipments.Add(reader.GetInt32("id"));
+                    }
+                }
+
+                // Mises à jour des états des équipements
+                using (var transaction = Program.conn.BeginTransaction())
+                {
+                    try
+                    {
+                        foreach (int equipmentId in allEquipments)
+                        {
+                            bool isLent = lentEquipments.Contains(equipmentId);
+                            string updateQuery = "UPDATE equipment SET available = @available WHERE id = @id";
+
+                            using (MySqlCommand cmd = new MySqlCommand(updateQuery, Program.conn, transaction))
+                            {
+                                cmd.Parameters.AddWithValue("@available", isLent ? 0 : 1);
+                                cmd.Parameters.AddWithValue("@id", equipmentId);
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
+
+                        transaction.Commit();
+                        MessageBox.Show("État des équipements mis à jour avec succès.");
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        MessageBox.Show($"Erreur lors de la mise à jour des états : {ex.Message}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur lors de la vérification des états : {ex.Message}");
+            }
+        }
+
         public static List<Equipment> Search(string searchTerm)
         {
             List<Equipment> filteredEquipments = new List<Equipment>();
-            List<Equipment> allEquipments = GetAll();
+            List<Equipment> allEquipments = GetAllAvailableEquipment();
             List<Category> allCategories = Category.GetAll();
 
             // Cherche si le searchTerm correspond à une catégorie
@@ -89,11 +156,11 @@ namespace TPI.Tables
 
             foreach (var equipment in allEquipments)
             {
-                if (equipment.Model.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                if ((equipment.Model.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
                     equipment.InventoryNumber.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
                     equipment.SerialNumber.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
                     equipment.CategoryId.ToString().Contains(searchTerm) ||
-                    (matchedCategoryId.HasValue && equipment.CategoryId == matchedCategoryId.Value))
+                    (matchedCategoryId.HasValue && equipment.CategoryId == matchedCategoryId.Value)) && equipment.Available == true)
                 {
                     filteredEquipments.Add(equipment);
                 }

@@ -48,17 +48,16 @@ namespace TPI.Tables
             return lendsList;
         }
 
-        public static bool Add(string status, DateTime? startDate, DateTime? endDate, DateTime? requestDate, int userId, int equipmentId)
+        public static bool Add(DateTime? startDate, DateTime? endDate, DateTime? requestDate, int userId, int equipmentId)
         {
             try
             {
                 string query = @"
-            INSERT INTO lends (status, startDate, endDate, requestDate, userId, equipmentId)
-            VALUES (, @startDate, @endDate, @requestDate, @userId, @equipmentId)";
+        INSERT INTO lends (status, startDate, endDate, requestDate, userId, equipmentId)
+        VALUES ('en attente d''approbation', @startDate, @endDate, @requestDate, @userId, @equipmentId) ;";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, Program.conn))
                 {
-                    cmd.Parameters.AddWithValue("@status", status);
                     cmd.Parameters.AddWithValue("@startDate", startDate.HasValue ? startDate.Value : (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@endDate", endDate.HasValue ? endDate.Value : (object)DBNull.Value);
                     cmd.Parameters.AddWithValue("@requestDate", requestDate.HasValue ? requestDate.Value : (object)DBNull.Value);
@@ -75,6 +74,7 @@ namespace TPI.Tables
                 return false;
             }
         }
+
     }
 }
 
