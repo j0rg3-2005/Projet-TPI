@@ -21,7 +21,7 @@ INSERT INTO users (lastName, firstName, email, password, role) VALUES
 ('Bernard', 'Lucie', 'lucie.bernard@example.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'client'),
 ('Petit', 'Hugo', 'hugo.petit@example.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'Administrateur');
 
--- Insertion de matériels disponibles
+-- Insertion de matériels disponiblesequipment
 INSERT INTO equipment (model, available, serialNumber, inventoryNumber, categoryId) VALUES
 ('Chargeur Anker 65W', False, 'SNCHARGER01', 'INV001', 1),
 ('Chargeur Samsung 25W', TRUE, 'SNCHARGER02', 'INV002', 1),

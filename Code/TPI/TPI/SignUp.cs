@@ -29,7 +29,6 @@ namespace TPI
             };
             this.Controls.Add(pnlInscription);
 
-            // Message de bienvenue
             Label lblWelcome = new Label
             {
                 Text = "Créer un compte\nVeuillez remplir le formulaire ci-dessous.",
@@ -39,7 +38,6 @@ namespace TPI
             };
             pnlInscription.Controls.Add(lblWelcome);
 
-            // Label Prénom
             Label lblPrenom = new Label
             {
                 Text = "Prénom",
@@ -55,7 +53,6 @@ namespace TPI
             };
             pnlInscription.Controls.Add(txtPrenom);
 
-            // Label Nom
             Label lblNom = new Label
             {
                 Text = "Nom",
@@ -71,7 +68,6 @@ namespace TPI
             };
             pnlInscription.Controls.Add(txtNom);
 
-            // Label Email
             Label lblEmail = new Label
             {
                 Text = "Adresse mail",
@@ -87,7 +83,6 @@ namespace TPI
             };
             pnlInscription.Controls.Add(txtEmail);
 
-            // Label Mot de passe
             Label lblPassword = new Label
             {
                 Text = "Mot de passe",
@@ -104,17 +99,15 @@ namespace TPI
             };
             pnlInscription.Controls.Add(txtPassword);
 
-            // Bouton S'inscrire
             Button btnRegister = new Button
             {
                 Text = "S'inscrire",
                 Width = 250,
                 Location = new Point(10, 290)
             };
-            btnRegister.Click += BtnRegister_Click; // Attacher l'événement click
+            btnRegister.Click += BtnRegister_Click;
             pnlInscription.Controls.Add(btnRegister);
 
-            // Message se connecter
             Label lblLoginMsg = new Label
             {
                 Text = "Déjà un compte ? Connectez-vous ci-dessous.",
@@ -124,7 +117,6 @@ namespace TPI
             };
             pnlInscription.Controls.Add(lblLoginMsg);
 
-            // Bouton Se connecter
             Button btnLogin = new Button
             {
                 Text = "Se connecter",
@@ -142,21 +134,19 @@ namespace TPI
             this.Hide();
             frmconnection.FormClosed += (s, args) => this.Show();
         }
-
-        // Méthode appelée lors du clic sur "S'inscrire"
         private void BtnRegister_Click(object sender, EventArgs e)
         {
-            // Récupérer les valeurs des champs
             string prenom = txtPrenom.Text;
             string nom = txtNom.Text;
             string email = txtEmail.Text;
             string motDePasse = txtPassword.Text;
 
-            // Appeler la méthode pour enregistrer l'utilisateur
             string resultMessage = Users.RegisterUser(prenom, nom, email, motDePasse);
 
-            // Afficher un message en fonction du résultat
-            MessageBox.Show(resultMessage);
+            frmconnection frmconnection = new frmconnection();
+            frmconnection.Show();
+            this.Hide();
+            frmconnection.FormClosed += (s, args) => this.Show();
         }
     }
 }

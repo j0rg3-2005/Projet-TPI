@@ -73,7 +73,7 @@ namespace TPI.Tables
             return categories;
         }
 
-        public static List<Category> GetAllConsumanles()
+        public static List<Category> GetAllConsumables()
         {
             List<Category> categories = new List<Category>();
 
@@ -91,7 +91,6 @@ namespace TPI.Tables
                         Name = reader["name"] != DBNull.Value ? reader["name"].ToString() : string.Empty,
                         Type = reader["type"] != DBNull.Value ? reader["type"].ToString() : string.Empty
                     };
-
                     categories.Add(cat);
                 }
 

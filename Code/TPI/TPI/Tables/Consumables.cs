@@ -82,7 +82,40 @@ namespace TPI.Tables
             }
         }
 
-        // Afficher les consommables dans un tableau
+        // Récupérer un consommable par son ID
+        public static Consumables GetById(int id)
+        {
+            Consumables consumable = null;
+
+            try
+            {
+                string query = "SELECT * FROM consumables WHERE id = @Id";
+                MySqlCommand cmd = new MySqlCommand(query, Program.conn);
+                cmd.Parameters.AddWithValue("@Id", id);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    consumable = new Consumables
+                    {
+                        Id = reader["id"] != DBNull.Value ? Convert.ToInt32(reader["id"]) : 0,
+                        Model = reader["model"] != DBNull.Value ? reader["model"].ToString() : string.Empty,
+                        Stock = reader["stock"] != DBNull.Value ? Convert.ToInt32(reader["stock"]) : 0,
+                        MinStock = reader["minStock"] != DBNull.Value ? Convert.ToInt32(reader["minStock"]) : 0,
+                        CategoryId = reader["categoryId"] != DBNull.Value ? Convert.ToInt32(reader["categoryId"]) : 0
+                    };
+                }
+
+                reader.Close();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur lors de la récupération du consommable par ID : {ex.Message}");
+            }
+
+            return consumable;
+        }
+
         public static void DisplayConsumables(List<Consumables> consumables, TableLayoutPanel tbl)
         {
             tbl.Controls.Clear();

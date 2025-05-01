@@ -47,6 +47,28 @@ namespace TPI.Tables
 
             return lendsList;
         }
+        public static List<(DateTime start, DateTime end)> GetReservedDates(int equipmentId)
+        {
+            List<(DateTime start, DateTime end)> reservedRanges = new();
+
+            string query = @"SELECT startDate, endDate FROM lends 
+                     WHERE equipmentId = @equipmentId AND status != 'refusé'";
+
+            using (MySqlCommand cmd = new MySqlCommand(query, Program.conn))
+            {
+                cmd.Parameters.AddWithValue("@equipmentId", equipmentId);
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        DateTime start = reader.GetDateTime("startDate");
+                        DateTime end = reader.GetDateTime("endDate");
+                        reservedRanges.Add((start, end));
+                    }
+                }
+            }
+            return reservedRanges;
+        }
 
         public static bool Add(DateTime? startDate, DateTime? endDate, DateTime? requestDate, int userId, int equipmentId)
         {

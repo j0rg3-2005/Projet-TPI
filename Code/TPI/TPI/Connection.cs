@@ -108,8 +108,6 @@ namespace TPI
                 Session.Role = user.Role;
                 Session.UserId = user.Id;
 
-                MessageBox.Show("Connexion réussie !", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
                 frmClient frmClient = new frmClient();
                 frmClient.Show();
                 this.Hide();

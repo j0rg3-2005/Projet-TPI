@@ -15,7 +15,7 @@ namespace TPI
             string password = "Pa$$w0rd";
             string constring = "SERVER=" + server + ";" + "DATABASE=" + database + ";" +
                 "UID=" + username + ";" + "PASSWORD=" + password + ";";
-
+            // A revoir
             conn = new MySqlConnection(constring);
             conn.Open();
 

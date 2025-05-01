@@ -81,11 +81,10 @@ namespace TPI.Tables
         {
             try
             {
-                // On récupère tous les équipements qui sont en prêt
-                string queryLends = @"
-            SELECT DISTINCT equipmentId 
-            FROM lends 
-            WHERE status IN ('en cours', 'en attente d''approbation')";
+                string queryLends = @"SELECT DISTINCT equipmentId FROM lends
+                WHERE status IN ('en cours', 'en attente d''approbation')
+                AND DATE(startDate) <= CURDATE()
+                AND DATE(endDate) >= CURDATE();";
                 HashSet<int> lentEquipments = new HashSet<int>();
 
                 using (MySqlCommand cmd = new MySqlCommand(queryLends, Program.conn))
@@ -97,7 +96,6 @@ namespace TPI.Tables
                     }
                 }
 
-                // On récupère tous les équipements de la table
                 string getAllEquipmentsQuery = "SELECT id FROM equipment";
                 List<int> allEquipments = new List<int>();
 
@@ -110,7 +108,6 @@ namespace TPI.Tables
                     }
                 }
 
-                // Mises à jour des états des équipements
                 using (var transaction = Program.conn.BeginTransaction())
                 {
                     try
@@ -150,7 +147,6 @@ namespace TPI.Tables
             List<Equipment> allEquipments = GetAllAvailableEquipment();
             List<Category> allCategories = Category.GetAll();
 
-            // Cherche si le searchTerm correspond à une catégorie
             int? matchedCategoryId = allCategories
                 .FirstOrDefault(c => c.Name.Equals(searchTerm, StringComparison.OrdinalIgnoreCase))?.Id;
 
@@ -169,8 +165,6 @@ namespace TPI.Tables
             return filteredEquipments;
         }
 
-
-        // Méthode pour ajouter un équipement dans la base de données
         public static void AddEquipment(string model, string inventoryNumber, string serialNumber, int categoryId)
         {
             try
@@ -232,49 +226,5 @@ namespace TPI.Tables
             tblEquipment.Controls.Add(new Label(), 0, tblEquipment.RowCount);
             tblEquipment.Controls.Add(new Label(), 1, tblEquipment.RowCount);
         }
-
-        public static void AddEquipment(TextBox txtModel, TextBox txtInventoryNumber, TextBox txtSerialNumber, TextBox txtCategory)
-        {
-            string model = txtModel.Text.Trim();
-            string inventoryNumber = txtInventoryNumber.Text.Trim();
-            string serialNumber = txtSerialNumber.Text.Trim();
-            int categoryId = int.TryParse(txtCategory.Text.Trim(), out int result) ? result : 0;
-
-            // Validation des champs obligatoires
-            if (string.IsNullOrEmpty(model) || string.IsNullOrEmpty(inventoryNumber) || string.IsNullOrEmpty(serialNumber))
-            {
-                MessageBox.Show("Veuillez remplir tous les champs du formulaire avant de soumettre.",
-                                "Champs manquants",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Warning);
-                return;
-            }
-
-            // Insertion des données dans la base de données
-            string query = "INSERT INTO equipment (model, inventoryNumber, serialNumber, categoryId) VALUES (@Model, @InventoryNumber, @SerialNumber, @CategoryId);";
-            MySqlCommand cmd = new MySqlCommand(query, Program.conn);
-            cmd.Parameters.AddWithValue("@Model", model);
-            cmd.Parameters.AddWithValue("@InventoryNumber", inventoryNumber);
-            cmd.Parameters.AddWithValue("@SerialNumber", serialNumber);
-            cmd.Parameters.AddWithValue("@CategoryId", categoryId);
-
-            try
-            {
-                cmd.ExecuteNonQuery();
-                MessageBox.Show("Les informations ont été enregistrées dans la base de données.",
-                                "Succès",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Information);
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erreur lors de l'ajout de l'équipement : {ex.Message}",
-                                "Erreur",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Error);
-            }
-        }
-
     }
 }

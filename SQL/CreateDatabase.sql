@@ -1,5 +1,6 @@
 -- Create the database if it does not exist
-CREATE DATABASE IF NOT EXISTS TPI;
+DROP DATABASE IF EXISTS TPI;
+CREATE DATABASE TPI;
 USE TPI;
 
 -- Users table
