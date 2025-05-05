@@ -14,6 +14,7 @@ namespace TPI
         Label lblRole;
         Button btnShowEquipment;
         Button btnShowConsummables;
+        Button btnShowAdmin;
         Panel pnlAddEquipment;
         int paddingMargin = 15;
         TextBox txtSearch;
@@ -23,7 +24,7 @@ namespace TPI
         ComboBox cmbCategory;
         MonthCalendar monthCalendar;
 
-        private List<(string model, int id, DateTime start, DateTime end)> EquipmentCartItems = new List<(string,int, DateTime, DateTime)>();
+        private List<(string model, int id, DateTime start, DateTime end)> EquipmentCartItems = new List<(string model, int id, DateTime start, DateTime end)>();
         private List<(string model, int id, int quantity)> ConsumableCartItems = new List<(string, int, int)>();
 
         private enum ViewMode { Equipment, Consumables }
@@ -99,6 +100,18 @@ namespace TPI
             btnShowConsummables.Left = txtSearch.Right + btnSearch.Width + btnShowEquipment.Width + paddingMargin * 3;
             btnShowConsummables.Click += btnShowConsummables_Click;
             this.Controls.Add(btnShowConsummables);
+
+            btnShowAdmin = new Button();
+            btnShowAdmin.Text = "Passer en mode admin";
+            btnShowAdmin.AutoSize = true;
+            btnShowAdmin.Width = 100;
+            btnShowAdmin.Top = paddingMargin;
+            btnShowAdmin.Left = txtSearch.Right + btnSearch.Width + btnShowEquipment.Width + btnShowConsummables.Width + paddingMargin * 5;
+            btnShowAdmin.Click += btnShowAdmin_Click;
+            if (Session.Role == "Administrateur")
+            {
+                this.Controls.Add(btnShowAdmin);
+            }
 
             flpMain = new FlowLayoutPanel();
             flpMain.Dock = DockStyle.Fill;
@@ -186,6 +199,7 @@ namespace TPI
 
             btnSubmit.Click += (sender, e) =>
             {
+                // Vérification de l'élément sélectionné dans le ComboBox
                 var selectedItem = cmbModel.SelectedItem as ComboBoxItem;
                 int itemId = selectedItem?.Id ?? 0;
 
@@ -195,9 +209,11 @@ namespace TPI
                     return;
                 }
 
+                // Récupérer les dates sélectionnées
                 DateTime startDate = monthCalendar.SelectionStart.Date;
                 DateTime endDate = monthCalendar.SelectionEnd.Date;
 
+                // Vérifier les dates réservées existantes
                 List<(DateTime start, DateTime end)> reservedDates = Lends.GetReservedDates(itemId);
                 foreach (var range in reservedDates)
                 {
@@ -210,14 +226,18 @@ namespace TPI
                     }
                 }
 
-                // Juste ajouter au panier
-                EquipmentCartItems.Add((selectedItem.DisplayText, startDate, endDate));
+                // Ajouter au panier en incluant l'ID
+                EquipmentCartItems.Add((selectedItem.DisplayText, itemId, startDate, endDate));
+
+                // Mettre à jour la table du panier
                 UpdateCartTable();
 
+                // Réinitialiser les sélections
                 cmbModel.SelectedIndex = -1;
                 cmbCategory.SelectedIndex = -1;
                 monthCalendar.SetSelectionRange(DateTime.Today, DateTime.Today.AddDays(1));
             };
+
 
             tblCart = new TableLayoutPanel();
             tblCart.Dock = DockStyle.Fill;
@@ -325,22 +345,37 @@ namespace TPI
 
             btnAddToCart.Click += (s, e) =>
             {
+                // Vérification si un modèle et une catégorie sont sélectionnés
                 if (cmbCategoryCons.SelectedItem == null || cmbModelCons.SelectedItem == null)
                 {
                     MessageBox.Show("Veuillez sélectionner une catégorie et un modèle.");
                     return;
                 }
 
-                var selected = cmbModelCons.SelectedItem as ComboBoxItem;
-                string model = selected.DisplayText.Split('-')[1].Trim();
-                int quantity = (int)nudQuantity.Value;
+                // Vérification du type de l'élément sélectionné dans cmbModelCons
+                if (cmbModelCons.SelectedItem is ComboBoxItem selected)
+                {
+                    // Récupérer les informations du modèle et de l'ID
+                    string model = selected.DisplayText.Split('-')[1].Trim(); // Récupère le modèle à partir de l'affichage
+                    int id = selected.Id; // Récupère l'ID du modèle
+                    int quantity = (int)nudQuantity.Value; // Quantité sélectionnée
 
-                ConsumableCartItems.Add((model, quantity));
-                UpdateCartTable();
+                    // Ajouter l'élément au panier
+                    ConsumableCartItems.Add((model, id, quantity));
 
-                cmbModelCons.SelectedIndex = -1;
-                cmbCategoryCons.SelectedIndex = -1;
-                nudQuantity.Value = 1;
+                    // Mettre à jour la table du panier
+                    UpdateCartTable();
+
+                    // Réinitialiser les sélections
+                    cmbModelCons.SelectedIndex = -1;
+                    cmbCategoryCons.SelectedIndex = -1;
+                    nudQuantity.Value = 1;
+                }
+                else
+                {
+                    // Si l'élément sélectionné n'est pas de type ComboBoxItem
+                    MessageBox.Show("Veuillez sélectionner un modèle valide.");
+                }
             };
 
             tblCart = new TableLayoutPanel();
@@ -370,14 +405,17 @@ namespace TPI
 
                 foreach (var item in ConsumableCartItems)
                 {
-                    int consumableId = int.Parse(item.Id.Trim().Split('-')[0]);
-                    Request.Add(DateTime.Today, Session.UserId, consumableId, item.quantity);
+                    int consumableId = item.id;
+                    int quantity = item.quantity;
+
+                    Request.Add(DateTime.Today, Session.UserId, consumableId, quantity);
                 }
 
                 MessageBox.Show("Demande de consommables validée avec succès !");
                 ConsumableCartItems.Clear();
                 UpdateCartTable();
             };
+
 
             pnlAddEquipment.Controls.Add(lblCategory);
             pnlAddEquipment.Controls.Add(cmbCategoryCons);
@@ -449,8 +487,6 @@ namespace TPI
 
             tblCart.RowCount = row + 1;
         }
-
-
         private void UpdateReservedDates()
         {
             if (cmbModel.SelectedItem is ComboBoxItem selectedItem)
@@ -491,8 +527,6 @@ namespace TPI
                 };
             }
         }
-
-
         private void AddEquipmentsToTable(List<Equipment> equipments)
         {
             tblEquipment.Controls.Clear();
@@ -614,6 +648,14 @@ namespace TPI
             flpMain.Controls.Clear();
             InitializeConsumableRequestPanel();
             AddConsumablesToTable(consumables);
+        }
+
+        private void btnShowAdmin_Click(object sender, EventArgs e)
+        {
+            frmAdministrator frmAdministrator = new frmAdministrator();
+            frmAdministrator.Show();
+            this.Hide();
+            frmAdministrator.FormClosed += (s, args) => this.Show();
         }
     }
 }

@@ -19,7 +19,8 @@ INSERT INTO users (lastName, firstName, email, password, role) VALUES
 ('Martin', 'Paul', 'paul.martin@example.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'Administrateur'),
 ('Moreau', 'Emma', 'emma.moreau@example.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'Administrateur'),
 ('Bernard', 'Lucie', 'lucie.bernard@example.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'client'),
-('Petit', 'Hugo', 'hugo.petit@example.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'Administrateur');
+('Petit', 'Hugo', 'hugo.petit@example.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'Administrateur'),
+('Costa','Jorge','j','189f40034be7a199f1fa9891668ee3ab6049f82d38c68be70f596eab2e1857b7','client');
 
 -- Insertion de matériels disponiblesequipment
 INSERT INTO equipment (model, available, serialNumber, inventoryNumber, categoryId) VALUES
