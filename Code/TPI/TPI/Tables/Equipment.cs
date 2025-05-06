@@ -82,7 +82,7 @@ namespace TPI.Tables
             try
             {
                 string queryLends = @"SELECT DISTINCT equipmentId FROM lends
-                WHERE status IN ('en cours', 'en attente d''approbation')
+                WHERE status IN ('en cours')
                 AND DATE(startDate) <= CURDATE()
                 AND DATE(endDate) >= CURDATE();";
                 HashSet<int> lentEquipments = new HashSet<int>();
@@ -124,14 +124,11 @@ namespace TPI.Tables
                                 cmd.ExecuteNonQuery();
                             }
                         }
-
                         transaction.Commit();
-                        MessageBox.Show("État des équipements mis à jour avec succès.");
                     }
                     catch (Exception ex)
                     {
                         transaction.Rollback();
-                        MessageBox.Show($"Erreur lors de la mise à jour des états : {ex.Message}");
                     }
                 }
             }

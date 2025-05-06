@@ -141,7 +141,7 @@ namespace TPI
             string email = txtEmail.Text;
             string motDePasse = txtPassword.Text;
 
-            string resultMessage = Users.RegisterUser(prenom, nom, email, motDePasse);
+            string resultMessage = User.RegisterUser(prenom, nom, email, motDePasse);
 
             frmconnection frmconnection = new frmconnection();
             frmconnection.Show();

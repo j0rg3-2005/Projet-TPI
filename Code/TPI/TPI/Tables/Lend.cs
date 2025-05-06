@@ -2,19 +2,20 @@
 
 namespace TPI.Tables
 {
-    public class Lends
+    public class Lend
     {
         public int Id { get; set; }
         public string Status { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public DateTime? ReturnDate { get; set; }
         public DateTime? RequestDate { get; set; }
         public int UserId { get; set; }
         public int EquipmentId { get; set; }
 
-        public static List<Lends> GetAll()
+        public static List<Lend> GetAll()
         {
-            List<Lends> lendsList = new List<Lends>();
+            List<Lend> lendsList = new List<Lend>();
 
             try
             {
@@ -24,12 +25,13 @@ namespace TPI.Tables
 
                 while (reader.Read())
                 {
-                    Lends lend = new Lends
+                    Lend lend = new Lend
                     {
                         Id = reader["id"] != DBNull.Value ? Convert.ToInt32(reader["id"]) : 0,
                         Status = reader["status"] != DBNull.Value ? reader["status"].ToString() : string.Empty,
                         StartDate = reader["startDate"] != DBNull.Value ? Convert.ToDateTime(reader["startDate"]) : (DateTime?)null,
                         EndDate = reader["endDate"] != DBNull.Value ? Convert.ToDateTime(reader["endDate"]) : (DateTime?)null,
+                        ReturnDate = reader["returnDate"] != DBNull.Value ? Convert.ToDateTime(reader["endDate"]) : (DateTime?)null,
                         RequestDate = reader["requestDate"] != DBNull.Value ? Convert.ToDateTime(reader["requestDate"]) : (DateTime?)null,
                         UserId = reader["userId"] != DBNull.Value ? Convert.ToInt32(reader["userId"]) : 0,
                         EquipmentId = reader["equipmentId"] != DBNull.Value ? Convert.ToInt32(reader["equipmentId"]) : 0
@@ -47,12 +49,41 @@ namespace TPI.Tables
 
             return lendsList;
         }
+        public void Update()
+        {
+            try
+            {
+                string query = "UPDATE lends SET status = @status, startDate = @start, returnDate = @return, endDate = @end WHERE id = @id";
+                using (var cmd = new MySqlCommand(query, Program.conn))
+                {
+                    cmd.Parameters.AddWithValue("@status", this.Status);
+                    cmd.Parameters.AddWithValue("@start", (object?)this.StartDate ?? DBNull.Value);
+                    if (this.Status == "retourné")
+                    {
+                        cmd.Parameters.AddWithValue("@return", DateTime.Now);
+                    }
+                    else
+                    {
+                        cmd.Parameters.AddWithValue("@return", null);
+                    }
+                    cmd.Parameters.AddWithValue("@end", (object?)this.EndDate ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@id", this.Id);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur lors de la mise à jour du prêt : {ex.Message}");
+            }
+        }
+
         public static List<(DateTime start, DateTime end)> GetReservedDates(int equipmentId)
         {
             List<(DateTime start, DateTime end)> reservedRanges = new();
 
             string query = @"SELECT startDate, endDate FROM lends 
-                     WHERE equipmentId = @equipmentId AND status != 'refusé'";
+                     WHERE equipmentId = @equipmentId AND status = 'accepté'";
 
             using (MySqlCommand cmd = new MySqlCommand(query, Program.conn))
             {
@@ -70,32 +101,24 @@ namespace TPI.Tables
             return reservedRanges;
         }
 
-        public static bool Add(DateTime? startDate, DateTime? endDate, DateTime? requestDate, int userId, int equipmentId)
+        public static void Add(Lend lend)
         {
-            try
-            {
-                string query = @"
-        INSERT INTO lends (status, startDate, endDate, requestDate, userId, equipmentId)
-        VALUES ('en attente d''approbation', @startDate, @endDate, @requestDate, @userId, @equipmentId) ;";
+            string query = @"INSERT INTO lends (status, startDate, endDate, returnDate, requestDate, userId, equipmentId)
+                     VALUES (@status, @start, @end, null, @request, @user, @equip)";
 
-                using (MySqlCommand cmd = new MySqlCommand(query, Program.conn))
-                {
-                    cmd.Parameters.AddWithValue("@startDate", startDate.HasValue ? startDate.Value : (object)DBNull.Value);
-                    cmd.Parameters.AddWithValue("@endDate", endDate.HasValue ? endDate.Value : (object)DBNull.Value);
-                    cmd.Parameters.AddWithValue("@requestDate", requestDate.HasValue ? requestDate.Value : (object)DBNull.Value);
-                    cmd.Parameters.AddWithValue("@userId", userId);
-                    cmd.Parameters.AddWithValue("@equipmentId", equipmentId);
-
-                    int rowsAffected = cmd.ExecuteNonQuery();
-                    return rowsAffected > 0;
-                }
-            }
-            catch (Exception ex)
+            using (var cmd = new MySqlConnector.MySqlCommand(query, Program.conn))
             {
-                Console.WriteLine($"Erreur lors de l'insertion d'un prêt : {ex.Message}");
-                return false;
+                cmd.Parameters.AddWithValue("@status", lend.Status);
+                cmd.Parameters.AddWithValue("@start", lend.StartDate);
+                cmd.Parameters.AddWithValue("@end", lend.EndDate);
+                cmd.Parameters.AddWithValue("@request", lend.RequestDate);
+                cmd.Parameters.AddWithValue("@user", lend.UserId);
+                cmd.Parameters.AddWithValue("@equip", lend.EquipmentId);
+
+                cmd.ExecuteNonQuery();
             }
         }
+
 
     }
 }

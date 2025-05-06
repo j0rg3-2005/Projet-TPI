@@ -48,12 +48,12 @@ namespace TPI
             public override string ToString() => DisplayText;
         }
 
-        private void frmClient_Load(object sender, EventArgs e)
+        public void frmClient_Load(object sender, EventArgs e)
         {
             InitializeClientUI();
         }
 
-        private void InitializeClientUI()
+        public void InitializeClientUI()
         {
             this.Controls.Clear();
             this.WindowState = FormWindowState.Maximized;
@@ -147,7 +147,7 @@ namespace TPI
             pnlAddEquipment.AutoSize = false;
 
             InitializeEquipmentLendPanel();
-            List<Equipment> equipments = Equipment.GetAllAvailableEquipment();
+            List<Equipment> equipments = Equipment.GetAll();
             AddEquipmentsToTable(equipments);
 
         }
@@ -181,19 +181,19 @@ namespace TPI
             Button btnSubmit = new Button() { Text = "Soumettre", Left = 120, Top = 250 };
 
             cmbCategory.SelectedIndexChanged += (s, ev) =>
+            {
+                cmbModel.Enabled = true;
+                cmbModel.Items.Clear();
+                if (cmbCategory.SelectedIndex != -1)
+                {
+                    List<Equipment> equipmentByCategory = Equipment.Search(cmbCategory.SelectedItem.ToString());
+                    foreach (var equipment in equipmentByCategory)
                     {
-                        cmbModel.Enabled = true;
-                        cmbModel.Items.Clear();
-                        if (cmbCategory.SelectedIndex != -1)
-                        {
-                            List<Equipment> equipmentByCategory = Equipment.Search(cmbCategory.SelectedItem.ToString());
-                            foreach (var equipment in equipmentByCategory)
-                            {
-                                cmbModel.Items.Add(new ComboBoxItem(equipment.Id, equipment.Model));
-                            }
-                            UpdateReservedDates();
-                        }
-                    };
+                        cmbModel.Items.Add(new ComboBoxItem(equipment.Id, equipment.Model));
+                    }
+                    UpdateReservedDates();
+                }
+            };
 
             cmbModel.SelectedIndexChanged += (s, ev) => UpdateReservedDates();
 
@@ -214,7 +214,7 @@ namespace TPI
                 DateTime endDate = monthCalendar.SelectionEnd.Date;
 
                 // Vérifier les dates réservées existantes
-                List<(DateTime start, DateTime end)> reservedDates = Lends.GetReservedDates(itemId);
+                List<(DateTime start, DateTime end)> reservedDates = Lend.GetReservedDates(itemId);
                 foreach (var range in reservedDates)
                 {
                     if ((startDate >= range.start && startDate <= range.end) ||
@@ -226,13 +226,10 @@ namespace TPI
                     }
                 }
 
-                // Ajouter au panier en incluant l'ID
                 EquipmentCartItems.Add((selectedItem.DisplayText, itemId, startDate, endDate));
 
-                // Mettre à jour la table du panier
                 UpdateCartTable();
 
-                // Réinitialiser les sélections
                 cmbModel.SelectedIndex = -1;
                 cmbCategory.SelectedIndex = -1;
                 monthCalendar.SetSelectionRange(DateTime.Today, DateTime.Today.AddDays(1));
@@ -265,23 +262,33 @@ namespace TPI
                     return;
                 }
 
+                var availableEquipment = Equipment.GetAllAvailableEquipment();
+
                 foreach (var item in EquipmentCartItems)
                 {
-                    Equipment equip = Equipment.GetAllAvailableEquipment().FirstOrDefault(eq => eq.Model == item.model);
+                    Equipment equip = availableEquipment.FirstOrDefault(eq => eq.Model == item.model);
 
                     if (equip == null)
                     {
-                        MessageBox.Show($"Le modèle {item.model} est introuvable.");
+                        MessageBox.Show($"L'item {item.model} est introuvable ou indisponible.");
                         continue;
                     }
 
-                    Lends.Add(item.start, item.end, DateTime.Today, Session.UserId, equip.Id);
+                    Lend.Add(new Lend
+                    {
+                        Status = "en attente",
+                        StartDate = item.start,
+                        EndDate = item.end,
+                        RequestDate = DateTime.Today,
+                        UserId = Session.UserId,
+                        EquipmentId = equip.Id
+                    });
                 }
-
-                MessageBox.Show("La demande a été validée avec succès !");
+                MessageBox.Show("Les demandes ont été envoyées avec succès !");
                 EquipmentCartItems.Clear();
                 UpdateCartTable();
             };
+
 
             pnlAddEquipment.Controls.Add(lblModel);
             pnlAddEquipment.Controls.Add(lblDate);
@@ -322,7 +329,7 @@ namespace TPI
                 cmbModelCons.Items.Clear();
                 if (cmbCategoryCons.SelectedIndex != -1)
                 {
-                    List<Consumables> cons = Consumables.Search(cmbCategoryCons.SelectedItem.ToString());
+                    List<Consumable> cons = Consumable.Search(cmbCategoryCons.SelectedItem.ToString());
                     foreach (var c in cons)
                     {
                         cmbModelCons.Items.Add(new ComboBoxItem(c.Id, $"{c.Id} - {c.Model}"));
@@ -334,7 +341,7 @@ namespace TPI
             {
                 if (cmbModelCons.SelectedItem is ComboBoxItem selectedItem)
                 {
-                    Consumables selectedConsumable = Consumables.GetById(selectedItem.Id);
+                    Consumable selectedConsumable = Consumable.GetById(selectedItem.Id);
                     if (selectedConsumable != null)
                     {
                         nudQuantity.Maximum = selectedConsumable.Stock;
@@ -416,7 +423,6 @@ namespace TPI
                 UpdateCartTable();
             };
 
-
             pnlAddEquipment.Controls.Add(lblCategory);
             pnlAddEquipment.Controls.Add(cmbCategoryCons);
             pnlAddEquipment.Controls.Add(lblModel);
@@ -434,7 +440,6 @@ namespace TPI
             tblCart.RowStyles.Clear();
             tblCart.RowCount = 0;
 
-            // En-têtes
             if (currentView == ViewMode.Equipment)
             {
                 tblCart.ColumnCount = 3;
@@ -463,35 +468,12 @@ namespace TPI
             }
         }
 
-
-        private void UpdateEquipmentCartTable()
-        {
-            tblCart.Controls.Clear();
-            tblCart.RowStyles.Clear();
-            tblCart.RowCount = 0;
-
-            // En-têtes
-            tblCart.Controls.Add(new Label() { Text = "Modèle", Font = new Font("Segoe UI", 10, FontStyle.Bold), AutoSize = true }, 0, 0);
-            tblCart.Controls.Add(new Label() { Text = "Début", Font = new Font("Segoe UI", 10, FontStyle.Bold), AutoSize = true }, 1, 0);
-            tblCart.Controls.Add(new Label() { Text = "Fin", Font = new Font("Segoe UI", 10, FontStyle.Bold), AutoSize = true }, 2, 0);
-
-            int row = 1;
-
-            foreach (var item in EquipmentCartItems)
-            {
-                tblCart.Controls.Add(new Label() { Text = item.model, AutoSize = true }, 0, row);
-                tblCart.Controls.Add(new Label() { Text = item.start.ToShortDateString(), AutoSize = true }, 1, row);
-                tblCart.Controls.Add(new Label() { Text = item.end.ToShortDateString(), AutoSize = true }, 2, row);
-                row++;
-            }
-
-            tblCart.RowCount = row + 1;
-        }
         private void UpdateReservedDates()
         {
             if (cmbModel.SelectedItem is ComboBoxItem selectedItem)
             {
-                List<(DateTime start, DateTime end)> reservedDates = Lends.GetReservedDates(selectedItem.Id);
+                List<(DateTime start, DateTime end)> reservedDates = Lend.GetReservedDates(selectedItem.Id);
+
                 monthCalendar.RemoveAllBoldedDates();
 
                 foreach (var range in reservedDates)
@@ -503,30 +485,21 @@ namespace TPI
                         current = current.AddDays(1);
                     }
                 }
+
                 monthCalendar.UpdateBoldedDates();
 
-                monthCalendar.DateSelected += (s, e) =>
+                foreach (var range in reservedDates)
                 {
-                    DateTime selectedStart = monthCalendar.SelectionStart;
-                    DateTime selectedEnd = monthCalendar.SelectionEnd;
-
-                    foreach (var range in reservedDates)
+                    DateTime current = range.start;
+                    while (current <= range.end)
                     {
-                        if ((selectedStart >= range.start && selectedStart <= range.end) ||
-                            (selectedEnd >= range.start && selectedEnd <= range.end) ||
-                            (selectedStart <= range.start && selectedEnd >= range.end))
-                        {
-                            MessageBox.Show("Cette période contient des dates déjà réservées.",
-                                          "Période indisponible",
-                                          MessageBoxButtons.OK,
-                                          MessageBoxIcon.Warning);
-                            monthCalendar.SetSelectionRange(DateTime.Today, DateTime.Today.AddDays(1));
-                            break;
-                        }
+                        monthCalendar.AddBoldedDate(current);
+                        current = current.AddDays(1);
                     }
-                };
+                }
             }
         }
+
         private void AddEquipmentsToTable(List<Equipment> equipments)
         {
             tblEquipment.Controls.Clear();
@@ -552,7 +525,7 @@ namespace TPI
                     "\r\n\r\n- Modèle : " + equipment.Model +
                     "\r\n\r\n- Numéro d'inventaire : " + equipment.InventoryNumber +
                     "\r\n\r\n- Numéro de série : " + equipment.SerialNumber +
-                    "\r\n\r\n- Catégorie : " + equipment.CategoryId.ToString() +
+                    "\r\n\r\n- Catégorie : " + Category.GetById(equipment.Id).ToString() +
                     "\r\n\r\n- Disponible : " + (equipment.Available ? "Oui" : "Non");
                 };
 
@@ -568,7 +541,7 @@ namespace TPI
             flpMain.Controls.Add(pnlAddEquipment);
         }
 
-        private void AddConsumablesToTable(List<Consumables> consumables)
+        private void AddConsumablesToTable(List<Consumable> consumables)
         {
             flpMain.Controls.Remove(tblEquipment);
             tblEquipment.Controls.Clear();
@@ -626,7 +599,7 @@ namespace TPI
             }
             else if (currentView == ViewMode.Consumables)
             {
-                List<Consumables> filteredConsumables = Consumables.Search(searchTerm);
+                List<Consumable> filteredConsumables = Consumable.Search(searchTerm);
                 flpMain.Controls.Clear();
                 AddConsumablesToTable(filteredConsumables);
             }
@@ -644,7 +617,7 @@ namespace TPI
         private void btnShowConsummables_Click(object sender, EventArgs e)
         {
             currentView = ViewMode.Consumables;
-            List<Consumables> consumables = Consumables.GetAll();
+            List<Consumable> consumables = Consumable.GetAll();
             flpMain.Controls.Clear();
             InitializeConsumableRequestPanel();
             AddConsumablesToTable(consumables);

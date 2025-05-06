@@ -99,7 +99,7 @@ namespace TPI
 
         private void btnLogin_Click(object sender, EventArgs e)
         {
-            var user = Tables.Users.GetUser(txtEmail.Text, txtPassword.Text);
+            var user = Tables.User.GetUser(txtEmail.Text, txtPassword.Text);
             if (user != null)
             {
                 Session.FirstName = user.FirstName;
@@ -109,8 +109,8 @@ namespace TPI
                 Session.UserId = user.Id;
 
                 frmClient frmClient = new frmClient();
-                frmClient.Show();
                 this.Hide();
+                frmClient.Show();
                 frmClient.FormClosed += (s, args) =>
                 {
                     this.Show();

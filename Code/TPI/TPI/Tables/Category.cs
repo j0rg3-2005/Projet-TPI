@@ -41,6 +41,38 @@ namespace TPI.Tables
             return categories;
         }
 
+        public static Category GetById(int id)
+        {
+            Category cat = null;
+
+            try
+            {
+                string query = "SELECT * FROM categories WHERE id = @id";
+                using (MySqlCommand cmd = new MySqlCommand(query, Program.conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", id);
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            cat = new Category
+                            {
+                                Id = reader["id"] != DBNull.Value ? Convert.ToInt32(reader["id"]) : 0,
+                                Name = reader["name"] != DBNull.Value ? reader["name"].ToString() : string.Empty,
+                                Type = reader["type"] != DBNull.Value ? reader["type"].ToString() : string.Empty
+                            };
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur lors de la récupération de la catégorie : {ex.Message}");
+            }
+
+            return cat;
+        }
+
         public static List<Category> GetAllEquipment()
         {
             List<Category> categories = new List<Category>();

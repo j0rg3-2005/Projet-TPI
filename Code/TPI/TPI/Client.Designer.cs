@@ -37,7 +37,7 @@
             ClientSize = new Size(800, 450);
             Name = "frmClient";
             Text = "ClientPage";
-            Load += this.frmClient_Load;
+            Load += frmClient_Load;
             ResumeLayout(false);
         }
 

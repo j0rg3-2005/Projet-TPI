@@ -2,7 +2,7 @@
 
 namespace TPI.Tables
 {
-    public class Consumables
+    public class Consumable
     {
         public int Id { get; set; }
         public string Model { get; set; }
@@ -11,9 +11,9 @@ namespace TPI.Tables
         public int CategoryId { get; set; }
 
         // Récupérer tous les consommables
-        public static List<Consumables> GetAll()
+        public static List<Consumable> GetAll()
         {
-            List<Consumables> consumablesList = new List<Consumables>();
+            List<Consumable> consumablesList = new List<Consumable>();
 
             try
             {
@@ -23,7 +23,7 @@ namespace TPI.Tables
 
                 while (reader.Read())
                 {
-                    Consumables cons = new Consumables
+                    Consumable cons = new Consumable
                     {
                         Id = reader["id"] != DBNull.Value ? Convert.ToInt32(reader["id"]) : 0,
                         Model = reader["model"] != DBNull.Value ? reader["model"].ToString() : string.Empty,
@@ -44,10 +44,10 @@ namespace TPI.Tables
         }
 
         // Rechercher des consommables par modèle, stock ou catégorie
-        public static List<Consumables> Search(string searchTerm)
+        public static List<Consumable> Search(string searchTerm)
         {
-            List<Consumables> result = new List<Consumables>();
-            List<Consumables> all = GetAll();
+            List<Consumable> result = new List<Consumable>();
+            List<Consumable> all = GetAll();
 
             foreach (var cons in all)
             {
@@ -82,10 +82,9 @@ namespace TPI.Tables
             }
         }
 
-        // Récupérer un consommable par son ID
-        public static Consumables GetById(int id)
+        public static Consumable GetById(int id)
         {
-            Consumables consumable = null;
+            Consumable consumable = null;
 
             try
             {
@@ -96,7 +95,7 @@ namespace TPI.Tables
 
                 if (reader.Read())
                 {
-                    consumable = new Consumables
+                    consumable = new Consumable
                     {
                         Id = reader["id"] != DBNull.Value ? Convert.ToInt32(reader["id"]) : 0,
                         Model = reader["model"] != DBNull.Value ? reader["model"].ToString() : string.Empty,
@@ -115,49 +114,25 @@ namespace TPI.Tables
 
             return consumable;
         }
-
-        public static void DisplayConsumables(List<Consumables> consumables, TableLayoutPanel tbl)
+        
+        public static void DecreaseQuantity(int consumableId, int quantity)
         {
-            tbl.Controls.Clear();
-            tbl.RowCount = 0;
-
-            foreach (var cons in consumables)
+            try
             {
-                Label lbl = new Label
+                string query = "UPDATE consumables SET stock = stock - @qty WHERE id = @id";
+                using (var cmd = new MySqlCommand(query, Program.conn))
                 {
-                    Text = cons.Model + " - ID: " + cons.Id,
-                    AutoSize = true,
-                    Padding = new Padding(5),
-                    Anchor = AnchorStyles.None
-                };
-
-                Button btnShow = new Button
-                {
-                    Text = "Afficher infos",
-                    AutoSize = true,
-                    Padding = new Padding(5),
-                    Anchor = AnchorStyles.None
-                };
-
-                btnShow.Click += (s, e) =>
-                {
-                    string info = $"INFOS DU CONSOMMABLE" +
-                                  $"\r\n\r\n- ID : {cons.Id}" +
-                                  $"\r\n\r\n- Modèle : {cons.Model}" +
-                                  $"\r\n\r\n- Stock : {cons.Stock}" +
-                                  $"\r\n\r\n- Min Stock : {cons.MinStock}" +
-                                  $"\r\n\r\n- Catégorie ID : {cons.CategoryId}";
-                    MessageBox.Show(info, "Détails du consommable", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                };
-
-                tbl.RowCount++;
-                tbl.Controls.Add(lbl, 0, tbl.RowCount);
-                tbl.Controls.Add(btnShow, 1, tbl.RowCount);
+                    cmd.Parameters.AddWithValue("@qty", quantity);
+                    cmd.Parameters.AddWithValue("@id", consumableId);
+                    cmd.ExecuteNonQuery();
+                }
             }
-
-            tbl.RowCount++;
-            tbl.Controls.Add(new Label(), 0, tbl.RowCount);
-            tbl.Controls.Add(new Label(), 1, tbl.RowCount);
+            catch (Exception ex)
+            {
+                Console.WriteLine("Erreur lors de la mise à jour de la quantité : " + ex.Message);
+            }
         }
+
+
     }
 }

@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace TPI.AdminTabs
 {
-    internal class Equipment
+    internal class Equipments
     {
+        
     }
 }

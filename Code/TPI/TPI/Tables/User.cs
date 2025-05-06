@@ -5,7 +5,7 @@ using System.Text;
 
 namespace TPI.Tables
 {
-    public class Users
+    public class User
     {
         public int Id { get; set; }
         public string LastName { get; set; }
@@ -94,7 +94,7 @@ namespace TPI.Tables
             return result != null && Convert.ToInt32(result) > 0;
         }
 
-        public static Users GetUser(string email, string password)
+        public static User GetUser(string email, string password)
         {
             string hashedPassword = HashPassword(password);
             string query = "SELECT * FROM users WHERE email = @Email AND password = @Password";
@@ -107,7 +107,7 @@ namespace TPI.Tables
             {
                 if (reader.Read())
                 {
-                    return new Users
+                    return new User
                     {
                         Id = Convert.ToInt32(reader["id"]),
                         FirstName = reader["firstname"].ToString(),
@@ -123,9 +123,9 @@ namespace TPI.Tables
         }
 
         // Récupérer tous les utilisateurs
-        public static List<Users> GetAll(string roleFilter = null)
+        public static List<User> GetAll(string roleFilter = null)
         {
-            List<Users> utilisateurs = new List<Users>();
+            List<User> utilisateurs = new List<User>();
 
             string query = "SELECT * FROM users";
             if (!string.IsNullOrEmpty(roleFilter))
@@ -142,7 +142,7 @@ namespace TPI.Tables
 
             while (reader.Read())
             {
-                Users user = new Users
+                User user = new User
                 {
                     Id = reader[""] != DBNull.Value ? (int)reader["ID"] : 0,
                     LastName = reader["lastName"] != DBNull.Value ? (string)reader["nom"] : string.Empty,
