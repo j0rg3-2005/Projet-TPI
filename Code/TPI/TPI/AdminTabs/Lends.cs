@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
 using TPI.Tables;
 
 namespace TPI.AdminTabs
@@ -14,7 +17,6 @@ namespace TPI.AdminTabs
         private Button btnReject;
         private Button btnReturn;
 
-
         public Lends()
         {
             this.Dock = DockStyle.Fill;
@@ -24,8 +26,8 @@ namespace TPI.AdminTabs
 
         private void InitializeComponents()
         {
-            this.Controls.Clear();
-            this.AutoScroll = true;
+            Controls.Clear();
+            AutoScroll = true;
 
             var mainLayout = new TableLayoutPanel
             {
@@ -37,8 +39,17 @@ namespace TPI.AdminTabs
             };
             mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 60));
             mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40));
-            this.Controls.Add(mainLayout);
+            Controls.Add(mainLayout);
 
+            InitializeLendTable();
+            mainLayout.Controls.Add(tblLends, 0, 0);
+
+            var rightPanel = InitializeRightPanel();
+            mainLayout.Controls.Add(rightPanel, 1, 0);
+        }
+
+        private void InitializeLendTable()
+        {
             tblLends = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -48,62 +59,29 @@ namespace TPI.AdminTabs
             };
 
             string[] headers = { "ID", "Statut", "Début", "Fin", "Retour", "Utilisateur", "Action" };
-            foreach (var h in headers)
+            foreach (var _ in headers)
                 tblLends.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / headers.Length));
 
-            for (int i = 0; i < headers.Length; i++)
-            {
-                tblLends.Controls.Add(new Label()
-                {
-                    Text = headers[i],
-                    Font = new Font("Segoe UI", 10, FontStyle.Bold)
-                }, i, 0);
-            }
+            AddHeaderRow(headers);
+        }
 
-            mainLayout.Controls.Add(tblLends, 0, 0);
-
-            var rightPanel = new FlowLayoutPanel
+        private FlowLayoutPanel InitializeRightPanel()
+        {
+            var panel = new FlowLayoutPanel
             {
                 Dock = DockStyle.Fill,
                 FlowDirection = FlowDirection.TopDown,
                 AutoSize = true,
                 WrapContents = false
             };
-            var btnAccept = new Button
-            {
-                Text = "Accepter la demande",
-                Width = 200,
-                Height = 30,
-                Margin = new Padding(10)
-            };
-            btnAccept.Click += BtnAccept_Click;
 
-            var btnReject = new Button
-            {
-                Text = "Refuser la demande",
-                Width = 200,
-                Height = 30,
-                Margin = new Padding(10)
-            };
-            btnReject.Click += BtnReject_Click;
+            btnAccept = CreateActionButton("Accepter la demande", BtnAccept_Click);
+            btnReject = CreateActionButton("Refuser la demande", BtnReject_Click);
+            btnReturn = CreateActionButton("Marquer comme retourné", BtnReturn_Click, enabled: false);
 
-            var btnReturn = new Button
-            {
-                Text = "Marquer comme retourné",
-                Width = 200,
-                Height = 30,
-                Margin = new Padding(10),
-                Enabled = false
-            };
-            btnReturn.Click += BtnReturn_Click;
-
-            rightPanel.Controls.Add(btnAccept);
-            rightPanel.Controls.Add(btnReject);
-            rightPanel.Controls.Add(btnReturn);
-
-            this.btnAccept = btnAccept;
-            this.btnReject = btnReject;
-            this.btnReturn = btnReturn;
+            panel.Controls.Add(btnAccept);
+            panel.Controls.Add(btnReject);
+            panel.Controls.Add(btnReturn);
 
             txtSelectedLend = new TextBox
             {
@@ -116,11 +94,35 @@ namespace TPI.AdminTabs
                 Margin = new Padding(10),
                 Text = "Veuillez sélectionner un prêt."
             };
-            rightPanel.Controls.Add(txtSelectedLend);
+            panel.Controls.Add(txtSelectedLend);
 
-            mainLayout.Controls.Add(rightPanel, 1, 0);
+            return panel;
+        }
 
+        private Button CreateActionButton(string text, EventHandler handler, bool enabled = true)
+        {
+            var button = new Button
+            {
+                Text = text,
+                Width = 200,
+                Height = 30,
+                Margin = new Padding(10),
+                Enabled = enabled
+            };
+            button.Click += handler;
+            return button;
+        }
 
+        private void AddHeaderRow(string[] headers)
+        {
+            for (int i = 0; i < headers.Length; i++)
+            {
+                tblLends.Controls.Add(new Label()
+                {
+                    Text = headers[i],
+                    Font = new Font("Segoe UI", 10, FontStyle.Bold)
+                }, i, 0);
+            }
         }
 
         private void LoadLends()
@@ -132,56 +134,42 @@ namespace TPI.AdminTabs
             tblLends.RowCount = 1;
 
             string[] headers = { "ID", "Statut", "Début", "Fin", "Retour", "Utilisateur", "Action" };
-            for (int i = 0; i < headers.Length; i++)
-            {
-                tblLends.Controls.Add(new Label()
-                {
-                    Text = headers[i],
-                    Font = new Font("Segoe UI", 10, FontStyle.Bold)
-                }, i, 0);
-            }
+            AddHeaderRow(headers);
 
             int row = 1;
             foreach (var lend in lends)
+                AddLendRow(lend, row++);
+        }
+
+        private void AddLendRow(Lend lend, int row)
+        {
+            tblLends.RowCount++;
+
+            tblLends.Controls.Add(new Label() { Text = lend.Id.ToString() }, 0, row);
+            tblLends.Controls.Add(new Label() { Text = lend.Status }, 1, row);
+            tblLends.Controls.Add(new Label() { Text = lend.StartDate?.ToShortDateString() ?? "-" }, 2, row);
+            tblLends.Controls.Add(new Label() { Text = lend.EndDate?.ToShortDateString() ?? "-" }, 3, row);
+            tblLends.Controls.Add(new Label() { Text = lend.ReturnDate?.ToShortDateString() ?? "-" }, 4, row);
+            tblLends.Controls.Add(new Label() { Text = lend.UserId.ToString() }, 5, row);
+
+            var btnShow = new Button()
             {
-                var lblId = new Label() { Text = lend.Id.ToString() };
-                var lblStatus = new Label() { Text = lend.Status };
-                var lblStart = new Label() { Text = lend.StartDate?.ToShortDateString() ?? "-" };
-                var lblEnd = new Label() { Text = lend.EndDate?.ToShortDateString() ?? "-" };
-                var lblReturn = new Label() { Text = lend.ReturnDate?.ToShortDateString() ?? "-" };
-                var lblUser = new Label() { Text = lend.UserId.ToString() };
+                Text = "Afficher les infos",
+                Tag = lend,
+                Width = 120,
+                Height = 25
+            };
+            btnShow.Click += BtnShow_Click;
 
-                var btnShow = new Button()
-                {
-                    Text = "Afficher les infos",
-                    Tag = lend,
-                    Width = 120,
-                    Height = 25
-                };
-                btnShow.Click += BtnShow_Click;
-
-                tblLends.RowCount++;
-                tblLends.Controls.Add(lblId, 0, row);
-                tblLends.Controls.Add(lblStatus, 1, row);
-                tblLends.Controls.Add(lblStart, 2, row);
-                tblLends.Controls.Add(lblEnd, 3, row);
-                tblLends.Controls.Add(lblReturn, 4, row);
-                tblLends.Controls.Add(lblUser, 5, row);
-                tblLends.Controls.Add(btnShow, 6, row);
-
-                row++;
-            }
+            tblLends.Controls.Add(btnShow, 6, row);
         }
 
         private void BtnShow_Click(object sender, EventArgs e)
         {
             if (sender is Button btn && btn.Tag is Lend lend)
             {
-                btnReturn.Enabled = false;
-                btnAccept.Enabled = false;
-                btnReject.Enabled = false;
-
                 selectedLend = lend;
+
                 txtSelectedLend.Text = $"ID: {lend.Id}\r\n" +
                                        $"Statut: {lend.Status}\r\n" +
                                        $"Date début: {lend.StartDate}\r\n" +
@@ -191,73 +179,62 @@ namespace TPI.AdminTabs
                                        $"Utilisateur: {lend.UserId}\r\n" +
                                        $"Équipement: {lend.EquipmentId}";
 
+                btnAccept.Enabled = lend.Status == "en attente";
+                btnReject.Enabled = lend.Status == "en attente";
                 btnReturn.Enabled = lend.Status == "accepté";
-
-                if(lend.Status == "en attente")
-                {
-                    btnAccept.Enabled = true;
-                    btnReject.Enabled = true;
-                }
             }
         }
+
         private void BtnAccept_Click(object sender, EventArgs e)
         {
-            if (selectedLend != null)
+            if (selectedLend == null) return;
+
+            var reservedDates = Lend.GetReservedDates(selectedLend.EquipmentId);
+            foreach (var (start, end) in reservedDates)
             {
-                // Vérifier si le matériel est déjà réservé pendant les dates demandées
-                List<(DateTime start, DateTime end)> reservedDates = Lend.GetReservedDates(selectedLend.EquipmentId);
-
-                foreach (var range in reservedDates)
+                if ((selectedLend.StartDate >= start && selectedLend.StartDate <= end) ||
+                    (selectedLend.EndDate >= start && selectedLend.EndDate <= end) ||
+                    (selectedLend.StartDate <= start && selectedLend.EndDate >= end))
                 {
-                    // Vérifier si les dates se chevauchent
-                    if ((selectedLend.StartDate >= range.start && selectedLend.StartDate <= range.end) ||
-                        (selectedLend.EndDate >= range.start && selectedLend.EndDate <= range.end) ||
-                        (selectedLend.StartDate <= range.start && selectedLend.EndDate >= range.end))
-                    {
-                        // Si une réservation existe déjà pour ces dates, afficher un message d'erreur
-                        MessageBox.Show("Ce matériel est déjà réservé pendant la période demandée.",
-                                         "Période indisponible",
-                                         MessageBoxButtons.OK,
-                                         MessageBoxIcon.Warning);
-                        return;
-                    }
+                    MessageBox.Show("Ce matériel est déjà réservé pendant la période demandée.",
+                                    "Période indisponible",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
+                    return;
                 }
-
-                selectedLend.Status = "accepté";
-                selectedLend.StartDate = DateTime.Now;
-                selectedLend.Update();
-
-                LoadLends();
-                txtSelectedLend.Text = "Demande acceptée.";
             }
+
+            selectedLend.Status = "accepté";
+            selectedLend.StartDate = DateTime.Now;
+            selectedLend.Update();
+
+            LoadLends();
+            txtSelectedLend.Text = "Demande acceptée.";
         }
 
         private void BtnReject_Click(object sender, EventArgs e)
         {
-            if (selectedLend != null)
-            {
-                selectedLend.Status = "refusé";
-                selectedLend.Update(); // idem
+            if (selectedLend == null) return;
 
-                LoadLends();
-                txtSelectedLend.Text = "Demande refusée.";
-                selectedLend = null;
-            }
+            selectedLend.Status = "refusé";
+            selectedLend.Update();
+
+            LoadLends();
+            txtSelectedLend.Text = "Demande refusée.";
+            selectedLend = null;
         }
 
         private void BtnReturn_Click(object sender, EventArgs e)
         {
-            if (selectedLend != null && selectedLend.Status == "accepté")
-            {
-                selectedLend.Status = "retourné";
-                selectedLend.EndDate = DateTime.Now;
-                selectedLend.Update();
+            if (selectedLend == null || selectedLend.Status != "accepté") return;
 
-                LoadLends();
-                txtSelectedLend.Text = "Matériel marqué comme retourné.";
-                selectedLend = null;
-            }
+            selectedLend.Status = "retourné";
+            selectedLend.EndDate = DateTime.Now;
+            selectedLend.Update();
+
+            LoadLends();
+            txtSelectedLend.Text = "Matériel marqué comme retourné.";
+            selectedLend = null;
         }
-
     }
 }

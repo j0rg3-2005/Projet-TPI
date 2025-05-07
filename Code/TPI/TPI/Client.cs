@@ -1,7 +1,4 @@
-﻿using Microsoft.VisualBasic.ApplicationServices;
-using TPI.Tables;
-using System.Drawing;
-using System.Windows.Forms;
+﻿using TPI.Tables;
 
 namespace TPI
 {

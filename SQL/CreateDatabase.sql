@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS lends (
     startDate DATETIME NOT NULL,
     endDate DATETIME NOT NULL,
     requestDate DATETIME NOT NULL,
+	returnDate DATETIME,
     userId INT,
     equipmentId INT,
     FOREIGN KEY (userId) REFERENCES users(id),
@@ -55,6 +56,7 @@ CREATE TABLE IF NOT EXISTS lends (
 );
 
 -- Request table (consumable request)
+
 CREATE TABLE IF NOT EXISTS request (
     id INT PRIMARY KEY AUTO_INCREMENT,
     status TEXT NOT NULL,

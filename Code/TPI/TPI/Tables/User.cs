@@ -69,17 +69,14 @@ namespace TPI.Tables
             }
             catch (MySqlException ex)
             {
-                // Gestion des erreurs SQL
                 return $"Une erreur s'est produite lors de l'inscription : {ex.Message}";
             }
             catch (Exception ex)
             {
-                // Gestion des erreurs générales
                 return $"Une erreur s'est produite : {ex.Message}";
             }
         }
 
-        // Fonction de connexion réussie (qui était déjà dans votre code)
         public static bool ConnectionSuccessfull(string email, string password)
         {
             string hashedPassword = HashPassword(password);
@@ -122,12 +119,11 @@ namespace TPI.Tables
             return null;
         }
 
-        // Récupérer tous les utilisateurs
         public static List<User> GetAll(string roleFilter = null)
         {
             List<User> utilisateurs = new List<User>();
-
             string query = "SELECT * FROM users";
+
             if (!string.IsNullOrEmpty(roleFilter))
             {
                 query += " WHERE role = @Role";
@@ -138,23 +134,47 @@ namespace TPI.Tables
             {
                 cmd.Parameters.AddWithValue("@Role", roleFilter);
             }
-            MySqlDataReader reader = cmd.ExecuteReader();
 
-            while (reader.Read())
+            using (MySqlDataReader reader = cmd.ExecuteReader())
             {
-                User user = new User
+                while (reader.Read())
                 {
-                    Id = reader[""] != DBNull.Value ? (int)reader["ID"] : 0,
-                    LastName = reader["lastName"] != DBNull.Value ? (string)reader["nom"] : string.Empty,
-                    FirstName = reader["firstName"] != DBNull.Value ? (string)reader["prenom"] : string.Empty,
-                    Email = reader["email"] != DBNull.Value ? (string)reader["email"] : string.Empty,
-                    Password = reader["password"] != DBNull.Value ? (string)reader["motDePasse"] : string.Empty,
-                    Role = reader["role"] != DBNull.Value ? (string)reader["role"] : string.Empty
-                };
-                utilisateurs.Add(user);
+                    User user = new User
+                    {
+                        Id = Convert.ToInt32(reader["id"]),
+                        LastName = reader["lastname"].ToString(),
+                        FirstName = reader["firstname"].ToString(),
+                        Email = reader["email"].ToString(),
+                        Role = reader["role"].ToString()
+                    };
+                    utilisateurs.Add(user);
+                }
             }
-            reader.Close();
+
             return utilisateurs;
         }
+        public static void Update(int id, string lastName, string firstName, string email, string role)
+        {
+            string query = @"UPDATE users 
+                     SET lastname = @LastName, firstname = @FirstName, email = @Email, role = @Role WHERE id = @Id";
+
+            MySqlCommand cmd = new MySqlCommand(query, Program.conn);
+            cmd.Parameters.AddWithValue("@LastName", lastName);
+            cmd.Parameters.AddWithValue("@FirstName", firstName);
+            cmd.Parameters.AddWithValue("@Email", email);
+            cmd.Parameters.AddWithValue("@Role", role);
+            cmd.Parameters.AddWithValue("@Id", id);
+
+            cmd.ExecuteNonQuery();
+        }
+        public static void Delete(int id)
+        {
+            string query = "DELETE FROM users WHERE id = @Id";
+            MySqlCommand cmd = new MySqlCommand(query, Program.conn);
+            cmd.Parameters.AddWithValue("@Id", id);
+
+            cmd.ExecuteNonQuery();
+        }
+
     }
 }

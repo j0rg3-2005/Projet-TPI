@@ -132,7 +132,60 @@ namespace TPI.Tables
                 Console.WriteLine("Erreur lors de la mise à jour de la quantité : " + ex.Message);
             }
         }
-
-
+        public static void Insert(string model, int stock, int minStock, int categoryId)
+        {
+            try
+            {
+                string query = "INSERT INTO consumables (model, stock, minStock, categoryId) VALUES (@model, @stock, @minStock, @categoryId)";
+                using (MySqlCommand cmd = new MySqlCommand(query, Program.conn))
+                {
+                    cmd.Parameters.AddWithValue("@model", model);
+                    cmd.Parameters.AddWithValue("@stock", stock);
+                    cmd.Parameters.AddWithValue("@minStock", minStock);
+                    cmd.Parameters.AddWithValue("@categoryId", categoryId);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Erreur lors de l'insertion du consommable : " + ex.Message);
+            }
+        }
+        public static void Update(int id, string model, int stock, int minStock, int categoryId)
+        {
+            try
+            {
+                string query = "UPDATE consumables SET model = @model, stock = @stock, minStock = @minStock, categoryId = @categoryId WHERE id = @id";
+                using (MySqlCommand cmd = new MySqlCommand(query, Program.conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.Parameters.AddWithValue("@model", model);
+                    cmd.Parameters.AddWithValue("@stock", stock);
+                    cmd.Parameters.AddWithValue("@minStock", minStock);
+                    cmd.Parameters.AddWithValue("@categoryId", categoryId);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Erreur lors de la mise à jour du consommable : " + ex.Message);
+            }
+        }
+        public static void Delete(int id)
+        {
+            try
+            {
+                string query = "DELETE FROM consumables WHERE id = @id";
+                using (MySqlCommand cmd = new MySqlCommand(query, Program.conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Erreur lors de la suppression du consommable : " + ex.Message);
+            }
+        }
     }
 }

@@ -1,4 +1,8 @@
 ﻿using MySqlConnector;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Forms;
 
 namespace TPI.Tables
 {
@@ -42,6 +46,63 @@ namespace TPI.Tables
             }
 
             return equipmentList;
+        }
+
+        public static bool DeleteById(int id)
+        {
+            try
+            {
+                string query = "DELETE FROM equipment WHERE id = @id";
+                using (MySqlCommand cmd = new MySqlCommand(query, Program.conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", id);
+                    int affectedRows = cmd.ExecuteNonQuery();
+                    return affectedRows > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur lors de la suppression de l’équipement : {ex.Message}");
+                return false;
+            }
+        }
+
+        public static void AddEquipment(string model, string inventoryNumber, string serialNumber, int categoryId)
+        {
+            try
+            {
+                string query = "INSERT INTO equipment (model, inventoryNumber, serialNumber, categoryId) VALUES (@Model, @InventoryNumber, @SerialNumber, @CategoryId);";
+                MySqlCommand cmd = new MySqlCommand(query, Program.conn);
+                cmd.Parameters.AddWithValue("@Model", model);
+                cmd.Parameters.AddWithValue("@InventoryNumber", inventoryNumber);
+                cmd.Parameters.AddWithValue("@SerialNumber", serialNumber);
+                cmd.Parameters.AddWithValue("@CategoryId", categoryId);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur lors de l'ajout d'un équipement : {ex.Message}");
+            }
+        }
+
+        public static void UpdateEquipment(int id, string model, string inventoryNumber, string serialNumber, int categoryId, bool available)
+        {
+            try
+            {
+                string query = "UPDATE equipment SET model = @Model, inventoryNumber = @InventoryNumber, serialNumber = @SerialNumber, categoryId = @CategoryId, available = @Available WHERE id = @Id";
+                MySqlCommand cmd = new MySqlCommand(query, Program.conn);
+                cmd.Parameters.AddWithValue("@Model", model);
+                cmd.Parameters.AddWithValue("@InventoryNumber", inventoryNumber);
+                cmd.Parameters.AddWithValue("@SerialNumber", serialNumber);
+                cmd.Parameters.AddWithValue("@CategoryId", categoryId);
+                cmd.Parameters.AddWithValue("@Available", available);
+                cmd.Parameters.AddWithValue("@Id", id);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur lors de la mise à jour d'un équipement : {ex.Message}");
+            }
         }
 
         public static List<Equipment> GetAllAvailableEquipment()
@@ -137,7 +198,78 @@ namespace TPI.Tables
                 Console.WriteLine($"Erreur lors de la vérification des états : {ex.Message}");
             }
         }
+        public static void SetAvailability(int equipmentId, bool available)
+        {
+            try
+            {
+                string query = "UPDATE equipment SET available = @available WHERE id = @id";
+                using (var cmd = new MySqlCommand(query, Program.conn))
+                {
+                    cmd.Parameters.AddWithValue("@available", available);
+                    cmd.Parameters.AddWithValue("@id", equipmentId);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur lors de la mise à jour de la disponibilité : {ex.Message}");
+            }
+        }
 
+        public static void Update(int id, string model, string inventoryNumber, string serialNumber, int categoryId, bool available)
+        {
+            try
+            {
+                string query = "UPDATE equipment SET model = @Model, inventoryNumber = @InventoryNumber, serialNumber = @SerialNumber, categoryId = @CategoryId, available = @Available WHERE id = @Id";
+                MySqlCommand cmd = new MySqlCommand(query, Program.conn);
+                cmd.Parameters.AddWithValue("@Model", model);
+                cmd.Parameters.AddWithValue("@InventoryNumber", inventoryNumber);
+                cmd.Parameters.AddWithValue("@SerialNumber", serialNumber);
+                cmd.Parameters.AddWithValue("@CategoryId", categoryId);
+                cmd.Parameters.AddWithValue("@Available", available);
+                cmd.Parameters.AddWithValue("@Id", id);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur lors de la mise à jour de l'équipement : {ex.Message}");
+            }
+        }
+
+        public static void Insert(string model, string inventoryNumber, string serialNumber, int categoryId, bool available)
+        {
+            try
+            {
+                string query = "INSERT INTO equipment (model, inventoryNumber, serialNumber, categoryId, available) VALUES (@Model, @InventoryNumber, @SerialNumber, @CategoryId, @Available);";
+                MySqlCommand cmd = new MySqlCommand(query, Program.conn);
+                cmd.Parameters.AddWithValue("@Model", model);
+                cmd.Parameters.AddWithValue("@InventoryNumber", inventoryNumber);
+                cmd.Parameters.AddWithValue("@SerialNumber", serialNumber);
+                cmd.Parameters.AddWithValue("@CategoryId", categoryId);
+                cmd.Parameters.AddWithValue("@Available", available);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur lors de l'ajout de l'équipement : {ex.Message}");
+            }
+        }
+
+        public static void Delete(int id)
+        {
+            try
+            {
+                string query = "DELETE FROM equipment WHERE id = @Id;";
+                MySqlCommand cmd = new MySqlCommand(query, Program.conn);
+                cmd.Parameters.AddWithValue("@Id", id);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur lors de la suppression de l'équipement : {ex.Message}");
+            }
+        }
+        
         public static List<Equipment> Search(string searchTerm)
         {
             List<Equipment> filteredEquipments = new List<Equipment>();
@@ -162,37 +294,39 @@ namespace TPI.Tables
             return filteredEquipments;
         }
 
-        public static void AddEquipment(string model, string inventoryNumber, string serialNumber, int categoryId)
-        {
-            try
-            {
-                string query = "INSERT INTO equipment (model, inventoryNumber, serialNumber, categoryId) VALUES (@Model, @InventoryNumber, @SerialNumber, @CategoryId);";
-                MySqlCommand cmd = new MySqlCommand(query, Program.conn);
-                cmd.Parameters.AddWithValue("@Model", model);
-                cmd.Parameters.AddWithValue("@InventoryNumber", inventoryNumber);
-                cmd.Parameters.AddWithValue("@SerialNumber", serialNumber);
-                cmd.Parameters.AddWithValue("@CategoryId", categoryId);
-                cmd.ExecuteNonQuery();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Erreur lors de l'ajout d'un équipement : {ex.Message}");
-            }
-        }
-
         public static void DisplayEquipments(List<Equipment> equipments, TableLayoutPanel tblEquipment)
         {
             tblEquipment.Controls.Clear();
             tblEquipment.RowCount = 0;
 
+            // Crée les en-têtes des colonnes
+            tblEquipment.ColumnCount = 3;
+            tblEquipment.RowCount++;
+
+            tblEquipment.Controls.Add(new Label() { Text = "Modèle", AutoSize = true, Padding = new Padding(5), TextAlign = ContentAlignment.MiddleCenter }, 0, 0);
+            tblEquipment.Controls.Add(new Label() { Text = "Numéro d'inventaire", AutoSize = true, Padding = new Padding(5), TextAlign = ContentAlignment.MiddleCenter }, 1, 0);
+            tblEquipment.Controls.Add(new Label() { Text = "Actions", AutoSize = true, Padding = new Padding(5), TextAlign = ContentAlignment.MiddleCenter }, 2, 0);
+
             foreach (var equipment in equipments)
             {
-                Label lblEquipment = new Label
+                tblEquipment.RowCount++;
+
+                Label lblModel = new Label
                 {
-                    Text = equipment.Model + " - " + equipment.InventoryNumber,
+                    Text = equipment.Model,
                     Anchor = AnchorStyles.None,
                     Padding = new Padding(5),
-                    AutoSize = true
+                    AutoSize = true,
+                    TextAlign = ContentAlignment.MiddleCenter
+                };
+
+                Label lblInventoryNumber = new Label
+                {
+                    Text = equipment.InventoryNumber,
+                    Anchor = AnchorStyles.None,
+                    Padding = new Padding(5),
+                    AutoSize = true,
+                    TextAlign = ContentAlignment.MiddleCenter
                 };
 
                 Button btnShowEquipmentInfo = new Button
@@ -214,14 +348,18 @@ namespace TPI.Tables
                     $"\r\n\r\n- Disponible : {(equipment.Available ? "Oui" : "Non")}";
                     MessageBox.Show(equipmentDetails, "Détails de l'équipement", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 };
-                tblEquipment.RowCount++;
-                tblEquipment.Controls.Add(lblEquipment, 0, tblEquipment.RowCount);
-                tblEquipment.Controls.Add(btnShowEquipmentInfo, 1, tblEquipment.RowCount);
+
+                tblEquipment.Controls.Add(lblModel, 0, tblEquipment.RowCount);
+                tblEquipment.Controls.Add(lblInventoryNumber, 1, tblEquipment.RowCount);
+                tblEquipment.Controls.Add(btnShowEquipmentInfo, 2, tblEquipment.RowCount);
             }
 
+            // Ajouter une ligne vide à la fin pour plus de clarté (optionnel)
             tblEquipment.RowCount++;
             tblEquipment.Controls.Add(new Label(), 0, tblEquipment.RowCount);
             tblEquipment.Controls.Add(new Label(), 1, tblEquipment.RowCount);
+            tblEquipment.Controls.Add(new Label(), 2, tblEquipment.RowCount);
         }
+
     }
 }

@@ -1,4 +1,5 @@
-﻿using TPI.Tables;
+﻿using System.Windows.Forms;
+using TPI.Tables;
 
 namespace TPI.AdminTabs
 {
@@ -11,6 +12,7 @@ namespace TPI.AdminTabs
         private Button btnReject;
         private Button btnRefresh;
         private ComboBox cmbStatusFilter;
+        private TableLayoutPanel mainLayout;
 
         private int paddingMargin = 15;
         private List<Request> requests;
@@ -27,7 +29,7 @@ namespace TPI.AdminTabs
             this.Controls.Clear();
             this.AutoScroll = true;
 
-            var mainLayout = new TableLayoutPanel
+            mainLayout = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
                 ColumnCount = 2,
@@ -58,8 +60,6 @@ namespace TPI.AdminTabs
             tblEquipment.Controls.Add(new Label() { Text = "Quantité", Font = new Font("Segoe UI", 10, FontStyle.Bold) }, 3, 0);
             tblEquipment.Controls.Add(new Label() { Text = "Action", Font = new Font("Segoe UI", 10, FontStyle.Bold) }, 4, 0);
 
-            mainLayout.Controls.Add(tblEquipment, 0, 0);
-
             var rightPanel = new FlowLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -89,8 +89,8 @@ namespace TPI.AdminTabs
             };
             cmbStatusFilter.Items.Add("Tous");
             cmbStatusFilter.Items.Add("en attente");
-            cmbStatusFilter.Items.Add("acceptée");
-            cmbStatusFilter.Items.Add("refusée");
+            cmbStatusFilter.Items.Add("accepté");
+            cmbStatusFilter.Items.Add("refusé");
             cmbStatusFilter.SelectedIndex = 0;
             cmbStatusFilter.SelectedIndexChanged += (s, e) => LoadRequests();
             rightPanel.Controls.Add(cmbStatusFilter);
@@ -146,6 +146,9 @@ namespace TPI.AdminTabs
 
         private void LoadRequests()
         {
+
+            mainLayout.Controls.Remove(tblEquipment);
+
             requests = Request.GetAll();
 
             string filter = cmbStatusFilter?.SelectedItem?.ToString();
@@ -187,6 +190,8 @@ namespace TPI.AdminTabs
                 tblEquipment.Controls.Add(btnShow, 4, row);
                 row++;
             }
+
+            mainLayout.Controls.Add(tblEquipment, 0, 0);
         }
 
         private void BtnShow_Click(object sender, EventArgs e)
@@ -232,7 +237,7 @@ namespace TPI.AdminTabs
             // Vérifie si le stock est suffisant
             if (consumable.Stock < selectedRequest.ConsumableQuantity)
             {
-                MessageBox.Show("Stock insuffisant pour valider cette requête.\nLe stock actuel est de " + consumable.Stock+".", "Erreur de stock", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Stock insuffisant pour valider cette requête.\nLe stock actuel est de " + consumable.Stock + ".", "Erreur de stock", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -241,7 +246,6 @@ namespace TPI.AdminTabs
 
             RefreshUI();
         }
-
 
         private void BtnReject_Click(object sender, EventArgs e)
         {

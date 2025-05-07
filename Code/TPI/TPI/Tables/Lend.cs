@@ -69,6 +69,15 @@ namespace TPI.Tables
                     cmd.Parameters.AddWithValue("@end", (object?)this.EndDate ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("@id", this.Id);
 
+                    if (this.Status == "accepté")
+                    {
+                        Equipment.SetAvailability(this.EquipmentId, false);
+                    }
+                    else if (this.Status == "retourné")
+                    {
+                        Equipment.SetAvailability(this.EquipmentId, true);
+                    }
+
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -118,8 +127,20 @@ namespace TPI.Tables
                 cmd.ExecuteNonQuery();
             }
         }
-
-
+        public static void DeleteByEquipmentId(int equipmentId)
+        {
+            try
+            {
+                string query = "DELETE FROM lends WHERE equipmentId = @Id;";
+                MySqlCommand cmd = new MySqlCommand(query, Program.conn);
+                cmd.Parameters.AddWithValue("@Id", equipmentId);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur lors de la suppression des prêts associés : {ex.Message}");
+            }
+        }
     }
 }
 

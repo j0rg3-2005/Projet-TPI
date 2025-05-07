@@ -20,7 +20,7 @@ INSERT INTO users (lastName, firstName, email, password, role) VALUES
 ('Moreau', 'Emma', 'emma.moreau@example.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'Administrateur'),
 ('Bernard', 'Lucie', 'lucie.bernard@example.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'client'),
 ('Petit', 'Hugo', 'hugo.petit@example.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'Administrateur'),
-('Costa','Jorge','j','189f40034be7a199f1fa9891668ee3ab6049f82d38c68be70f596eab2e1857b7','client');
+('Costa','Jorge','j','189f40034be7a199f1fa9891668ee3ab6049f82d38c68be70f596eab2e1857b7','Administrateur');
 
 -- Insertion de matériels disponiblesequipment
 INSERT INTO equipment (model, available, serialNumber, inventoryNumber, categoryId) VALUES
@@ -45,11 +45,11 @@ INSERT INTO consumables (model, stock, minStock, categoryId) VALUES
 ('Transistor 2N2222', 200, 150, 8);
 
 -- Création d'emprunts de matériel
-INSERT INTO lends (status, startDate, endDate, requestDate, userId, equipmentId) VALUES
-('en cours', '2025-04-25 09:00:00', '2025-04-30 09:00:00', '2025-04-24 08:30:00', 1, 1),
-('en cours', '2025-04-25 09:30:00', '2025-04-30 09:00:00', '2025-04-24 09:00:00', 2, 3),
-('retourné', '2025-04-10 10:00:00', '2025-04-17 10:00:00', '2025-04-09 09:00:00', 5, 5),
-('retourné', '2025-04-05 11:00:00', '2025-04-10 15:00:00', '2025-04-04 10:30:00', 6, 7);
+INSERT INTO lends (status, startDate, endDate, returnDate, requestDate, userId, equipmentId) VALUES
+('accepté', '2025-04-25 09:00:00', '2025-04-30 09:00:00', null,'2025-04-24 08:30:00', 1, 1),
+('accepté', '2025-04-25 09:30:00', '2025-04-30 09:00:00', null,'2025-04-24 09:00:00', 2, 3),
+('retourné', '2025-04-10 10:00:00', '2025-04-17 10:00:00', '2025-04-09 09:00:00','2025-04-09 09:00:00', 5, 5),
+('retourné', '2025-04-05 11:00:00', '2025-04-10 15:00:00','2025-04-09 09:00:00', '2025-04-04 10:30:00', 6, 7);
 
 -- Création de demandes de consommables
 INSERT INTO request (status, requestDate, consumableQuantity, userId, consumableId) VALUES
@@ -57,5 +57,5 @@ INSERT INTO request (status, requestDate, consumableQuantity, userId, consumable
 ('accepté', '2025-04-26 15:00:00', 15, 2, 2),
 ('en attente', '2025-04-26 16:00:00', 25, 3, 3),
 ('accepté', '2025-04-27 10:00:00', 10, 4, 4),
-('rejeté', '2025-04-27 11:00:00', 30, 5, 5),
+('refusé', '2025-04-27 11:00:00', 30, 5, 5),
 ('en attente', '2025-04-27 12:00:00', 50, 6, 6);

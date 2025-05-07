@@ -10,7 +10,8 @@ namespace TPI
         private TabControl tabMain;
 
         private const int paddingMargin = 10;
-        private Label lblRole;
+        private Dictionary<string, Func<Control>> tabFactories;
+
 
         public frmAdministrator()
         {
@@ -28,25 +29,40 @@ namespace TPI
             this.WindowState = FormWindowState.Maximized;
             this.Padding = new Padding(paddingMargin);
 
-
-
             // TabControl
             tabMain = new TabControl
             {
                 Dock = DockStyle.Fill,
             };
-            MessageBox.Show(this.ClientSize.Width.ToString());
 
             ShowTab("Demandes", new Requests());
             ShowTab("Prêts", new Lends());
-            //ShowTab("Matériel", new Equipments());
-            //ShowTab("Consommables", new Consumables());
-            //ShowTab("Catégories", new Categories());
-            //ShowTab("Utilisateurs", new Users());
+            ShowTab("Matériel", new Equipments());
+            ShowTab("Consommables", new Consumables());
+            ShowTab("Catégories", new Categories());
+            ShowTab("Utilisateurs", new Users());
+
+            this.Controls.Add(tabMain);
+
+            tabFactories = new Dictionary<string, Func<Control>>
+            {
+                { "Demandes", () => new Requests() },
+                { "Prêts", () => new Lends() },
+                { "Matériel", () => new Equipments() },
+                { "Consommables", () => new Consumables() },
+                { "Utilisateurs", () => new Users() }
+            };
+
+            tabMain.SelectedIndexChanged += TabMain_SelectedIndexChanged;
+
+            foreach (var pair in tabFactories)
+            {
+                ShowTab(pair.Key, pair.Value());
+            }
         }
+
         private void ShowTab(string tabTitle, Control content)
         {
-            // Vérifie si l'onglet existe déjà
             foreach (TabPage tab in tabMain.TabPages)
             {
                 if (tab.Text == tabTitle)
@@ -60,13 +76,18 @@ namespace TPI
             newTab.Controls.Add(content);
             tabMain.TabPages.Add(newTab);
         }
-
-        private void BtnBack_Click(object sender, EventArgs e)
+        private void TabMain_SelectedIndexChanged(object sender, EventArgs e)
         {
-            this.Hide();
-            frmClient clientForm = new frmClient();
-            clientForm.InitializeClientUI();
-            clientForm.Show();
+            var selectedTab = tabMain.SelectedTab;
+            string title = selectedTab.Text;
+
+            if (tabFactories.TryGetValue(title, out var factory))
+            {
+                selectedTab.Controls.Clear();
+                var newControl = factory();
+                newControl.Dock = DockStyle.Fill;
+                selectedTab.Controls.Add(newControl);
+            }
         }
     }
 }
