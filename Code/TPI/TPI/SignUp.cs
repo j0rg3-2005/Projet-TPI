@@ -4,7 +4,6 @@ namespace TPI
 {
     public partial class frmSignUp : Form
     {
-        // Déclarer les variables de champ pour les contrôles de formulaire
         private TextBox txtPrenom;
         private TextBox txtNom;
         private TextBox txtEmail;

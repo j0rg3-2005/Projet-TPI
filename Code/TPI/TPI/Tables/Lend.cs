@@ -1,5 +1,4 @@
 ﻿using MySqlConnector;
-
 namespace TPI.Tables
 {
     public class Lend
@@ -36,17 +35,14 @@ namespace TPI.Tables
                         UserId = reader["userId"] != DBNull.Value ? Convert.ToInt32(reader["userId"]) : 0,
                         EquipmentId = reader["equipmentId"] != DBNull.Value ? Convert.ToInt32(reader["equipmentId"]) : 0
                     };
-
                     lendsList.Add(lend);
                 }
-
                 reader.Close();
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Erreur lors de la récupération des prêts : {ex.Message}");
             }
-
             return lendsList;
         }
         public void Update()
@@ -86,13 +82,11 @@ namespace TPI.Tables
                 Console.WriteLine($"Erreur lors de la mise à jour du prêt : {ex.Message}");
             }
         }
-
         public static List<(DateTime start, DateTime end)> GetReservedDates(int equipmentId)
         {
             List<(DateTime start, DateTime end)> reservedRanges = new();
 
-            string query = @"SELECT startDate, endDate FROM lends 
-                     WHERE equipmentId = @equipmentId AND status = 'accepté'";
+            string query = @"SELECT startDate, endDate FROM lends WHERE equipmentId = @equipmentId AND status = 'accepté'";
 
             using (MySqlCommand cmd = new MySqlCommand(query, Program.conn))
             {
@@ -109,11 +103,10 @@ namespace TPI.Tables
             }
             return reservedRanges;
         }
-
         public static void Add(Lend lend)
         {
             string query = @"INSERT INTO lends (status, startDate, endDate, returnDate, requestDate, userId, equipmentId)
-                     VALUES (@status, @start, @end, null, @request, @user, @equip)";
+            VALUES (@status, @start, @end, null, @request, @user, @equip)";
 
             using (var cmd = new MySqlConnector.MySqlCommand(query, Program.conn))
             {
@@ -123,22 +116,7 @@ namespace TPI.Tables
                 cmd.Parameters.AddWithValue("@request", lend.RequestDate);
                 cmd.Parameters.AddWithValue("@user", lend.UserId);
                 cmd.Parameters.AddWithValue("@equip", lend.EquipmentId);
-
                 cmd.ExecuteNonQuery();
-            }
-        }
-        public static void DeleteByEquipmentId(int equipmentId)
-        {
-            try
-            {
-                string query = "DELETE FROM lends WHERE equipmentId = @Id;";
-                MySqlCommand cmd = new MySqlCommand(query, Program.conn);
-                cmd.Parameters.AddWithValue("@Id", equipmentId);
-                cmd.ExecuteNonQuery();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Erreur lors de la suppression des prêts associés : {ex.Message}");
             }
         }
     }

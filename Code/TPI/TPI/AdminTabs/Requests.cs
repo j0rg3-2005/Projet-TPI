@@ -1,6 +1,4 @@
-﻿using System.Windows.Forms;
-using TPI.Tables;
-
+﻿using TPI.Tables;
 namespace TPI.AdminTabs
 {
     public partial class Requests : UserControl
@@ -13,7 +11,6 @@ namespace TPI.AdminTabs
         private Button btnRefresh;
         private ComboBox cmbStatusFilter;
         private TableLayoutPanel mainLayout;
-
         private int paddingMargin = 15;
         private List<Request> requests;
 
@@ -23,7 +20,6 @@ namespace TPI.AdminTabs
             InitializeComponents();
             LoadRequests();
         }
-
         private void InitializeComponents()
         {
             this.Controls.Clear();
@@ -40,11 +36,10 @@ namespace TPI.AdminTabs
             mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 60));
             mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40));
             this.Controls.Add(mainLayout);
-
             tblEquipment = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
-                ColumnCount = 5,
+                ColumnCount = 6,
                 AutoScroll = true,
                 CellBorderStyle = TableLayoutPanelCellBorderStyle.Single
             };
@@ -52,22 +47,14 @@ namespace TPI.AdminTabs
             {
                 tblEquipment.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
             }
-            tblEquipment.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-
-            tblEquipment.Controls.Add(new Label() { Text = "ID", Font = new Font("Segoe UI", 10, FontStyle.Bold) }, 0, 0);
-            tblEquipment.Controls.Add(new Label() { Text = "Statut", Font = new Font("Segoe UI", 10, FontStyle.Bold) }, 1, 0);
-            tblEquipment.Controls.Add(new Label() { Text = "Date", Font = new Font("Segoe UI", 10, FontStyle.Bold) }, 2, 0);
-            tblEquipment.Controls.Add(new Label() { Text = "Quantité", Font = new Font("Segoe UI", 10, FontStyle.Bold) }, 3, 0);
-            tblEquipment.Controls.Add(new Label() { Text = "Action", Font = new Font("Segoe UI", 10, FontStyle.Bold) }, 4, 0);
-
             var rightPanel = new FlowLayoutPanel
             {
                 Dock = DockStyle.Fill,
                 FlowDirection = FlowDirection.TopDown,
                 AutoSize = true,
-                WrapContents = false
+                WrapContents = false,
+                BorderStyle = BorderStyle.FixedSingle,
             };
-
             txtSelectedEquipmentId = new TextBox
             {
                 ReadOnly = true,
@@ -141,14 +128,10 @@ namespace TPI.AdminTabs
 
             mainLayout.Controls.Add(rightPanel, 1, 0);
         }
-
         private Request selectedRequest;
-
         private void LoadRequests()
         {
-
             mainLayout.Controls.Remove(tblEquipment);
-
             requests = Request.GetAll();
 
             string filter = cmbStatusFilter?.SelectedItem?.ToString();
@@ -159,19 +142,21 @@ namespace TPI.AdminTabs
             tblEquipment.Controls.Clear();
             tblEquipment.RowCount = 1;
 
-            tblEquipment.Controls.Add(new Label() { Text = "ID", Font = new Font("Segoe UI", 10, FontStyle.Bold) }, 0, 0);
-            tblEquipment.Controls.Add(new Label() { Text = "Statut", Font = new Font("Segoe UI", 10, FontStyle.Bold) }, 1, 0);
-            tblEquipment.Controls.Add(new Label() { Text = "Date", Font = new Font("Segoe UI", 10, FontStyle.Bold) }, 2, 0);
-            tblEquipment.Controls.Add(new Label() { Text = "Quantité", Font = new Font("Segoe UI", 10, FontStyle.Bold) }, 3, 0);
-            tblEquipment.Controls.Add(new Label() { Text = "Action", Font = new Font("Segoe UI", 10, FontStyle.Bold) }, 4, 0);
+            tblEquipment.Controls.Add(new Label() { Text = "Statut", Font = new Font("Segoe UI", 10, FontStyle.Bold) }, 0, 0);
+            tblEquipment.Controls.Add(new Label() { Text = "Date", Font = new Font("Segoe UI", 10, FontStyle.Bold) }, 1, 0);
+            tblEquipment.Controls.Add(new Label() { Text = "Quantité", Font = new Font("Segoe UI", 10, FontStyle.Bold) }, 2, 0);
+            tblEquipment.Controls.Add(new Label() { Text = "Utilisateur", Font = new Font("Segoe UI", 10, FontStyle.Bold) }, 3, 0);
+            tblEquipment.Controls.Add(new Label() { Text = "Consommable", Font = new Font("Segoe UI", 10, FontStyle.Bold), AutoSize = true }, 4, 0);
+            tblEquipment.Controls.Add(new Label() { Text = "Action", Font = new Font("Segoe UI", 10, FontStyle.Bold) }, 5, 0);
 
             int row = 1;
             foreach (var req in filtered)
             {
-                var lblId = new Label() { Text = req.Id.ToString() };
                 var lblStatus = new Label() { Text = req.Status };
                 var lblDate = new Label() { Text = req.RequestDate.ToShortDateString() };
                 var lblQty = new Label() { Text = req.ConsumableQuantity.ToString() };
+                var lblUser = new Label() { Text = User.GetUserById(req.UserId).FirstName + " " + User.GetUserById(req.UserId).LastName };
+                var lblConsumable = new Label() { Text = Consumable.GetById(req.ConsumableId).Model };
 
                 var btnShow = new Button()
                 {
@@ -183,28 +168,26 @@ namespace TPI.AdminTabs
                 btnShow.Click += BtnShow_Click;
 
                 tblEquipment.RowCount++;
-                tblEquipment.Controls.Add(lblId, 0, row);
-                tblEquipment.Controls.Add(lblStatus, 1, row);
-                tblEquipment.Controls.Add(lblDate, 2, row);
-                tblEquipment.Controls.Add(lblQty, 3, row);
-                tblEquipment.Controls.Add(btnShow, 4, row);
+                tblEquipment.Controls.Add(lblStatus, 0, row);
+                tblEquipment.Controls.Add(lblDate, 1, row);
+                tblEquipment.Controls.Add(lblQty, 2, row);
+                tblEquipment.Controls.Add(lblUser, 3, row);
+                tblEquipment.Controls.Add(lblConsumable, 4, row);
+                tblEquipment.Controls.Add(btnShow, 5, row);
                 row++;
             }
-
             mainLayout.Controls.Add(tblEquipment, 0, 0);
         }
-
         private void BtnShow_Click(object sender, EventArgs e)
         {
             if (sender is Button btn && btn.Tag is Request req)
             {
                 selectedRequest = req;
-                txtSelectedEquipmentId.Text = $"ID: {req.Id}\r\n" +
-                                              $"Statut: {req.Status}\r\n" +
-                                              $"Date: {req.RequestDate}\r\n" +
+                txtSelectedEquipmentId.Text = $"Statut: {req.Status}\r\n" +
+                                              $"Date: {req.RequestDate.ToShortDateString()}\r\n" +
                                               $"Quantité: {req.ConsumableQuantity}\r\n" +
-                                              $"Utilisateur: {req.UserId}\r\n" +
-                                              $"Consommable: {req.ConsumableId}";
+                                              $"Utilisateur: {User.GetUserById(req.UserId).FirstName + " " + User.GetUserById(req.UserId).LastName}\r\n" +
+                                              $"Consommable: {Consumable.GetById(req.ConsumableId).Model}";
             }
             if (selectedRequest.Status == "en attente")
             {
@@ -217,7 +200,6 @@ namespace TPI.AdminTabs
                 btnReject.Enabled = false;
             }
         }
-
         private void BtnAccept_Click(object sender, EventArgs e)
         {
             if (selectedRequest == null)
@@ -225,28 +207,21 @@ namespace TPI.AdminTabs
                 MessageBox.Show("Veuillez d'abord sélectionner une requête.");
                 return;
             }
-
-            // Récupère le consommable concerné
             var consumable = Consumable.GetById(selectedRequest.ConsumableId);
             if (consumable == null)
             {
                 MessageBox.Show("Consommable introuvable.");
                 return;
             }
-
-            // Vérifie si le stock est suffisant
             if (consumable.Stock < selectedRequest.ConsumableQuantity)
             {
                 MessageBox.Show("Stock insuffisant pour valider cette requête.\nLe stock actuel est de " + consumable.Stock + ".", "Erreur de stock", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
-            // Mise à jour du statut de la requête
             Request.UpdateRequestStatus(selectedRequest.Id, "accepté");
 
             RefreshUI();
         }
-
         private void BtnReject_Click(object sender, EventArgs e)
         {
             if (selectedRequest == null)
@@ -254,11 +229,9 @@ namespace TPI.AdminTabs
                 MessageBox.Show("Veuillez d'abord sélectionner une requête.");
                 return;
             }
-
             Request.UpdateRequestStatus(selectedRequest.Id, "refusé");
             RefreshUI();
         }
-
         private void RefreshUI()
         {
             selectedRequest = null;

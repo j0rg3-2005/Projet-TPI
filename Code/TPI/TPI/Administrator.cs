@@ -11,32 +11,24 @@ namespace TPI
 
         private const int paddingMargin = 10;
         private Dictionary<string, Func<Control>> tabFactories;
-
-
         public frmAdministrator()
         {
             InitializeComponent();
             InitializeUI();
         }
-
-        private void frmAdministrator_Load(object sender, EventArgs e)
-        {
-        }
-
         private void InitializeUI()
         {
             this.Controls.Clear();
             this.WindowState = FormWindowState.Maximized;
             this.Padding = new Padding(paddingMargin);
 
-            // TabControl
             tabMain = new TabControl
             {
                 Dock = DockStyle.Fill,
             };
 
-            ShowTab("Demandes", new Requests());
-            ShowTab("Prêts", new Lends());
+            ShowTab("Demandes de consommables", new Requests());
+            ShowTab("Demandes de prêt", new Lends());
             ShowTab("Matériel", new Equipments());
             ShowTab("Consommables", new Consumables());
             ShowTab("Catégories", new Categories());
@@ -46,10 +38,11 @@ namespace TPI
 
             tabFactories = new Dictionary<string, Func<Control>>
             {
-                { "Demandes", () => new Requests() },
-                { "Prêts", () => new Lends() },
+                { "Demandes de consommables", () => new Requests() },
+                { "Demandes de prêt", () => new Lends() },
                 { "Matériel", () => new Equipments() },
                 { "Consommables", () => new Consumables() },
+                { "Catégories",() => new Categories() },
                 { "Utilisateurs", () => new Users() }
             };
 
@@ -60,7 +53,6 @@ namespace TPI
                 ShowTab(pair.Key, pair.Value());
             }
         }
-
         private void ShowTab(string tabTitle, Control content)
         {
             foreach (TabPage tab in tabMain.TabPages)

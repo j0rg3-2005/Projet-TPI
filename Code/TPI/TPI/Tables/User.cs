@@ -1,5 +1,4 @@
 ﻿using MySqlConnector;
-using System;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -14,7 +13,6 @@ namespace TPI.Tables
         public string Password { get; set; }
         public string Role { get; set; }
 
-        // Fonction pour hacher le mot de passe
         public static string HashPassword(string password)
         {
             using (SHA256 sha256Hash = SHA256.Create())
@@ -29,22 +27,16 @@ namespace TPI.Tables
                 return builder.ToString();
             }
         }
-
-        // Méthode pour inscrire un utilisateur
         public static string RegisterUser(string firstName, string lastName, string email, string password)
         {
-            // Vérification si les champs sont remplis
             if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
                 return "Veuillez remplir tous les champs.";
             }
-
-            // Hachage du mot de passe
             string hashedPassword = HashPassword(password);
 
             try
             {
-                // Vérification si l'email est déjà utilisé
                 string checkEmailQuery = "SELECT COUNT(*) FROM users WHERE email = @Email";
                 MySqlCommand checkEmailCmd = new MySqlCommand(checkEmailQuery, Program.conn);
                 checkEmailCmd.Parameters.AddWithValue("@Email", email);
@@ -63,7 +55,6 @@ namespace TPI.Tables
                 cmd.Parameters.AddWithValue("@Email", email);
                 cmd.Parameters.AddWithValue("@Password", hashedPassword);
 
-
                 cmd.ExecuteNonQuery();
                 return "Utilisateur inscrit avec succès !";
             }
@@ -76,21 +67,6 @@ namespace TPI.Tables
                 return $"Une erreur s'est produite : {ex.Message}";
             }
         }
-
-        public static bool ConnectionSuccessfull(string email, string password)
-        {
-            string hashedPassword = HashPassword(password);
-
-            string query = "SELECT COUNT(*) FROM users WHERE email = @Email AND password = @Password";
-            MySqlCommand cmd = new MySqlCommand(query, Program.conn);
-            cmd.Parameters.AddWithValue("@Email", email);
-            cmd.Parameters.AddWithValue("@Password", hashedPassword);
-
-            object result = cmd.ExecuteScalar();
-
-            return result != null && Convert.ToInt32(result) > 0;
-        }
-
         public static User GetUser(string email, string password)
         {
             string hashedPassword = HashPassword(password);
@@ -115,10 +91,31 @@ namespace TPI.Tables
                     };
                 }
             }
-
             return null;
         }
+        public static User GetUserById(int id)
+        {
+            string query = "SELECT * FROM users WHERE id = @id";
 
+            MySqlCommand cmd = new MySqlCommand(query, Program.conn);
+            cmd.Parameters.AddWithValue("@id", id);
+
+            using (MySqlDataReader reader = cmd.ExecuteReader())
+            {
+                if (reader.Read())
+                {
+                    return new User
+                    {
+                        Id = Convert.ToInt32(reader["id"]),
+                        FirstName = reader["firstname"].ToString(),
+                        LastName = reader["lastname"].ToString(),
+                        Email = reader["email"].ToString(),
+                        Role = reader["role"].ToString()
+                    };
+                }
+            }
+            return null;
+        }
         public static List<User> GetAll(string roleFilter = null)
         {
             List<User> utilisateurs = new List<User>();
@@ -150,13 +147,11 @@ namespace TPI.Tables
                     utilisateurs.Add(user);
                 }
             }
-
             return utilisateurs;
         }
         public static void Update(int id, string lastName, string firstName, string email, string role)
         {
-            string query = @"UPDATE users 
-                     SET lastname = @LastName, firstname = @FirstName, email = @Email, role = @Role WHERE id = @Id";
+            string query = @"UPDATE users SET lastname = @LastName, firstname = @FirstName, email = @Email, role = @Role WHERE id = @Id";
 
             MySqlCommand cmd = new MySqlCommand(query, Program.conn);
             cmd.Parameters.AddWithValue("@LastName", lastName);
@@ -175,6 +170,5 @@ namespace TPI.Tables
 
             cmd.ExecuteNonQuery();
         }
-
     }
 }

@@ -37,7 +37,6 @@
             ClientSize = new Size(800, 450);
             Name = "frmAdministrator";
             Text = "Administrator";
-            Load += frmAdministrator_Load;
             ResumeLayout(false);
         }
 

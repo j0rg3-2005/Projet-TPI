@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Windows.Forms;
-using TPI.Tables;
-
+﻿using TPI.Tables;
 namespace TPI.AdminTabs
 {
     public partial class Consumables : UserControl
@@ -11,12 +6,10 @@ namespace TPI.AdminTabs
         private TableLayoutPanel tblConsumables;
         private List<Consumable> consumableList;
         private Consumable selectedConsumable;
-
         private TextBox txtModel;
         private TextBox txtStock;
         private TextBox txtMinStock;
         private ComboBox cmbCategory;
-
         private Button btnSave;
         private Button btnCancel;
         private Button btnDelete;
@@ -27,7 +20,6 @@ namespace TPI.AdminTabs
             InitializeComponents();
             LoadConsumables();
         }
-
         private void InitializeComponents()
         {
             this.Controls.Clear();
@@ -48,23 +40,10 @@ namespace TPI.AdminTabs
             tblConsumables = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
-                ColumnCount = 6,
+                ColumnCount = 5,
                 AutoScroll = true,
                 CellBorderStyle = TableLayoutPanelCellBorderStyle.Single
             };
-
-            string[] headers = { "Model", "Stock", "Min Stock", "Category", "Actions" };
-            foreach (var h in headers)
-                tblConsumables.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / headers.Length));
-
-            for (int i = 0; i < headers.Length; i++)
-            {
-                tblConsumables.Controls.Add(new Label()
-                {
-                    Text = headers[i],
-                    Font = new Font("Segoe UI", 10, FontStyle.Bold)
-                }, i, 0);
-            }
 
             mainLayout.Controls.Add(tblConsumables, 0, 0);
 
@@ -75,18 +54,17 @@ namespace TPI.AdminTabs
                 AutoSize = true,
                 CellBorderStyle = TableLayoutPanelCellBorderStyle.None,
                 Padding = new Padding(10),
+                BorderStyle = BorderStyle.FixedSingle,
             };
-
-            // Champs de saisie pour ajouter/modifier un consommable
-            rightPanel.Controls.Add(new Label { Text = "Modèle" ,Anchor = AnchorStyles.Right, AutoSize = true }, 0, 0);
+            rightPanel.Controls.Add(new Label { Text = "Modèle", Anchor = AnchorStyles.Right, AutoSize = true }, 0, 0);
             txtModel = new TextBox();
             rightPanel.Controls.Add(txtModel, 1, 0);
 
-            rightPanel.Controls.Add(new Label { Text = "Stock" , Anchor = AnchorStyles.Right, AutoSize = true }, 0, 1);
+            rightPanel.Controls.Add(new Label { Text = "Stock", Anchor = AnchorStyles.Right, AutoSize = true }, 0, 1);
             txtStock = new TextBox();
             rightPanel.Controls.Add(txtStock, 1, 1);
 
-            rightPanel.Controls.Add(new Label { Text = "Stock Min" , Anchor = AnchorStyles.Right, AutoSize = true }, 0, 2);
+            rightPanel.Controls.Add(new Label { Text = "Stock Min", Anchor = AnchorStyles.Right, AutoSize = true }, 0, 2);
             txtMinStock = new TextBox();
             rightPanel.Controls.Add(txtMinStock, 1, 2);
 
@@ -132,20 +110,18 @@ namespace TPI.AdminTabs
                 Enabled = false
             };
             btnDelete.Click += BtnDelete_Click;
-            rightPanel.Controls.Add(btnDelete, 1 , 6);
+            rightPanel.Controls.Add(btnDelete, 1, 6);
             mainLayout.Controls.Add(rightPanel, 1, 0);
         }
-
         private void LoadConsumables()
         {
             selectedConsumable = null;
-
-            consumableList = Consumable.GetAll(); // Suppose que cette méthode existe pour récupérer tous les consommables
+            consumableList = Consumable.GetAll();
 
             tblConsumables.Controls.Clear();
             tblConsumables.RowCount = 1;
 
-            string[] headers = { "Model", "Stock", "Min Stock", "Category", "Actions" };
+            string[] headers = { "Model", "Stock", "Min Stock", "Categorie", "Afficher infos" };
             for (int i = 0; i < headers.Length; i++)
             {
                 tblConsumables.Controls.Add(new Label()
@@ -154,10 +130,10 @@ namespace TPI.AdminTabs
                     Font = new Font("Segoe UI", 10, FontStyle.Bold)
                 }, i, 0);
             }
-
             int row = 1;
             foreach (var cons in consumableList)
             {
+                tblConsumables.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / headers.Length));
                 tblConsumables.RowCount++;
 
                 var lblModel = new Label { Text = cons.Model };
@@ -168,8 +144,7 @@ namespace TPI.AdminTabs
                 {
                     Text = "Sélectionner",
                     Tag = cons,
-                    Width = 100,
-                    Height = 25
+                    AutoSize = true,
                 };
                 btnSelect.Click += BtnSelect_Click;
 
@@ -182,7 +157,6 @@ namespace TPI.AdminTabs
                 row++;
             }
         }
-
         private void BtnSelect_Click(object sender, EventArgs e)
         {
             if (sender is Button btn && btn.Tag is Consumable cons)
@@ -195,12 +169,12 @@ namespace TPI.AdminTabs
                 btnDelete.Enabled = true;
             }
         }
-
         private void BtnSave_Click(object sender, EventArgs e)
         {
             int categoryId = (int)cmbCategory.SelectedValue;
 
-            if (selectedConsumable == null) {
+            if (selectedConsumable == null)
+            {
                 if (txtModel.Text != "" && txtStock.Text != "" && txtMinStock.Text != "" && cmbCategory.SelectedValue != null)
                 {
                     Consumable.Insert(txtModel.Text, int.Parse(txtStock.Text), int.Parse(txtMinStock.Text), categoryId);
@@ -213,7 +187,7 @@ namespace TPI.AdminTabs
             }
             else
             {
-                 Consumable.Update(selectedConsumable.Id, txtModel.Text, int.Parse(txtStock.Text), int.Parse(txtMinStock.Text), categoryId);
+                Consumable.Update(selectedConsumable.Id, txtModel.Text, int.Parse(txtStock.Text), int.Parse(txtMinStock.Text), categoryId);
             }
 
             txtModel.Clear();
@@ -224,7 +198,6 @@ namespace TPI.AdminTabs
             btnDelete.Enabled = false;
             LoadConsumables();
         }
-
         private void BtnCancel_Click(object sender, EventArgs e)
         {
             selectedConsumable = null;
@@ -233,7 +206,6 @@ namespace TPI.AdminTabs
             txtMinStock.Clear();
             cmbCategory.SelectedIndex = -1;
         }
-
         private void BtnDelete_Click(object sender, EventArgs e)
         {
             if (selectedConsumable == null)

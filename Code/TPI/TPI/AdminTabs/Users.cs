@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Windows.Forms;
-using TPI.Tables;
-
+﻿using TPI.Tables;
 namespace TPI.AdminTabs
 {
     public partial class Users : UserControl
@@ -11,13 +6,11 @@ namespace TPI.AdminTabs
         private TableLayoutPanel tblUsers;
         private List<User> userList;
         private User selectedUser;
-
         private TextBox txtLastName;
         private TextBox txtFirstName;
         private TextBox txtEmail;
-        private TextBox txtPassword;
         private ComboBox cmbRole;
-
+        private TableLayoutPanel mainLayout;
         private Button btnSave;
         private Button btnCancel;
         private Button btnDelete;
@@ -26,15 +19,13 @@ namespace TPI.AdminTabs
         {
             this.Dock = DockStyle.Fill;
             InitializeComponents();
-            LoadUsers();
         }
-
         private void InitializeComponents()
         {
             this.Controls.Clear();
             this.AutoScroll = true;
 
-            var mainLayout = new TableLayoutPanel
+            mainLayout = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
                 ColumnCount = 2,
@@ -44,7 +35,6 @@ namespace TPI.AdminTabs
             };
             mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 60));
             mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40));
-            this.Controls.Add(mainLayout);
 
             tblUsers = new TableLayoutPanel
             {
@@ -54,7 +44,7 @@ namespace TPI.AdminTabs
                 CellBorderStyle = TableLayoutPanelCellBorderStyle.Single
             };
 
-            string[] headers = { "Nom", "Prénom", "Email", "Rôle", "Actions" };
+            string[] headers = { "Nom", "Prénom", "Email", "Rôle", "Afficher infos" };
             foreach (var h in headers)
                 tblUsers.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / headers.Length));
 
@@ -67,8 +57,6 @@ namespace TPI.AdminTabs
                 }, i, 0);
             }
 
-            mainLayout.Controls.Add(tblUsers, 0, 0);
-
             var rightPanel = new TableLayoutPanel
             {
                 Dock = DockStyle.Top,
@@ -76,26 +64,24 @@ namespace TPI.AdminTabs
                 AutoSize = true,
                 CellBorderStyle = TableLayoutPanelCellBorderStyle.None,
                 Padding = new Padding(10),
+                BorderStyle = BorderStyle.FixedSingle,
             };
-            rightPanel.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-            rightPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 
-            // Nom
+            rightPanel.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            rightPanel.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+
             rightPanel.Controls.Add(new Label { Text = "Nom", Anchor = AnchorStyles.Right, AutoSize = true }, 0, 0);
             txtLastName = new TextBox { Width = 200 };
             rightPanel.Controls.Add(txtLastName, 1, 0);
 
-            // Prénom
             rightPanel.Controls.Add(new Label { Text = "Prénom", Anchor = AnchorStyles.Right, AutoSize = true }, 0, 1);
             txtFirstName = new TextBox { Width = 200 };
             rightPanel.Controls.Add(txtFirstName, 1, 1);
 
-            // Email
             rightPanel.Controls.Add(new Label { Text = "Email", Anchor = AnchorStyles.Right, AutoSize = true }, 0, 2);
             txtEmail = new TextBox { Width = 200 };
             rightPanel.Controls.Add(txtEmail, 1, 2);
 
-            // Rôle
             rightPanel.Controls.Add(new Label { Text = "Rôle", Anchor = AnchorStyles.Right, AutoSize = true }, 0, 3);
             cmbRole = new ComboBox
             {
@@ -106,7 +92,6 @@ namespace TPI.AdminTabs
             cmbRole.Items.Add("client");
             rightPanel.Controls.Add(cmbRole, 1, 3);
 
-            // Boutons
             btnSave = new Button
             {
                 Text = "Modifier",
@@ -136,15 +121,16 @@ namespace TPI.AdminTabs
                 Enabled = false
             };
             btnDelete.Click += BtnDelete_Click;
+            this.Controls.Add(mainLayout);
             rightPanel.Controls.Add(btnDelete, 1, 6);
             mainLayout.Controls.Add(rightPanel, 1, 0);
+            LoadUsers();
+            mainLayout.Controls.Add(tblUsers, 0, 0);
         }
-
         private void LoadUsers()
         {
             selectedUser = null;
             userList = User.GetAll();
-
             tblUsers.Controls.Clear();
             tblUsers.RowCount = 1;
 
@@ -186,7 +172,6 @@ namespace TPI.AdminTabs
                 row++;
             }
         }
-
         private void BtnSelect_Click(object sender, EventArgs e)
         {
             if (sender is Button btn && btn.Tag is User user)
@@ -199,7 +184,6 @@ namespace TPI.AdminTabs
                 btnDelete.Enabled = true;
             }
         }
-
         private void BtnSave_Click(object sender, EventArgs e)
         {
             if (selectedUser == null)
@@ -213,22 +197,18 @@ namespace TPI.AdminTabs
                 MessageBox.Show("Veuillez remplir tous les champs.");
                 return;
             }
-
             User.Update(selectedUser.Id,
                         txtLastName.Text,
                         txtFirstName.Text,
                         txtEmail.Text,
                         cmbRole.SelectedItem.ToString());
-
             ClearForm();
             LoadUsers();
         }
-
         private void BtnCancel_Click(object sender, EventArgs e)
         {
             ClearForm();
         }
-
         private void BtnDelete_Click(object sender, EventArgs e)
         {
             if (selectedUser == null)
@@ -243,7 +223,6 @@ namespace TPI.AdminTabs
                 LoadUsers();
             }
         }
-
         private void ClearForm()
         {
             selectedUser = null;

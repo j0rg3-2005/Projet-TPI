@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Windows.Forms;
-using TPI.Tables;
-
+﻿using TPI.Tables;
 namespace TPI.AdminTabs
 {
     public partial class Equipments : UserControl
@@ -12,7 +7,6 @@ namespace TPI.AdminTabs
         private List<Equipment> equipmentList;
         private Equipment selectedEquipment;
 
-        private TextBox txtDetails;
         private Button btnSave;
         private Button btnCancel;
         private Button btnDelete;
@@ -29,7 +23,6 @@ namespace TPI.AdminTabs
             InitializeComponents();
             LoadEquipments();
         }
-
         private void InitializeComponents()
         {
             this.Controls.Clear();
@@ -55,19 +48,6 @@ namespace TPI.AdminTabs
                 CellBorderStyle = TableLayoutPanelCellBorderStyle.Single
             };
 
-            string[] headers = { "model", "inventoryNumber", "available", "serialNumber", "categoryId" };
-            foreach (var h in headers)
-                tblEquipments.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / headers.Length));
-
-            for (int i = 0; i < headers.Length; i++)
-            {
-                tblEquipments.Controls.Add(new Label()
-                {
-                    Text = headers[i],
-                    Font = new Font("Segoe UI", 10, FontStyle.Bold)
-                }, i, 0);
-            }
-
             mainLayout.Controls.Add(tblEquipments, 0, 0);
 
             var rightPanel = new TableLayoutPanel
@@ -77,6 +57,7 @@ namespace TPI.AdminTabs
                 AutoSize = true,
                 CellBorderStyle = TableLayoutPanelCellBorderStyle.None,
                 Padding = new Padding(10),
+                BorderStyle = BorderStyle.FixedSingle,
             };
 
             rightPanel.Controls.Add(new Label { Text = "Modèle", Anchor = AnchorStyles.Right, AutoSize = true }, 0, 0);
@@ -144,7 +125,6 @@ namespace TPI.AdminTabs
 
             mainLayout.Controls.Add(rightPanel, 1, 0);
         }
-
         private void LoadEquipments()
         {
             selectedEquipment = null;
@@ -154,16 +134,17 @@ namespace TPI.AdminTabs
             tblEquipments.Controls.Clear();
             tblEquipments.RowCount = 1;
 
-            string[] headers = { "model", "inventoryNumber", "available", "serialNumber", "categoryId", "Bouton" };
+            string[] headers = { "Model", "Numéro d'inventaire", "Disponible", "Numéro de serie", "Catégorie", "Afficher infos" };
             for (int i = 0; i < headers.Length; i++)
             {
+                tblEquipments.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / headers.Length));
                 tblEquipments.Controls.Add(new Label()
                 {
                     Text = headers[i],
-                    Font = new Font("Segoe UI", 10, FontStyle.Bold)
+                    Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                    AutoSize = true
                 }, i, 0);
             }
-
             int row = 1;
             foreach (var eq in equipmentList)
             {
@@ -193,7 +174,6 @@ namespace TPI.AdminTabs
                 row++;
             }
         }
-
         private void BtnSelect_Click(object sender, EventArgs e)
         {
             if (sender is Button btn && btn.Tag is Equipment eq)
@@ -208,14 +188,13 @@ namespace TPI.AdminTabs
                 btnDelete.Enabled = true;
             }
         }
-
         private void BtnSave_Click(object sender, EventArgs e)
         {
             int categoryId = (int)cmbCategory.SelectedValue;
 
             if (selectedEquipment == null)
             {
-                if(txtModel.Text != "" && txtInventory.Text != "" && txtSerial.Text != "" && categoryId != null)
+                if (txtModel.Text != "" && txtInventory.Text != "" && txtSerial.Text != "" && categoryId != null)
                 {
                     Equipment.Insert(txtModel.Text, txtInventory.Text, txtSerial.Text, categoryId, chkAvailable.Checked);
                 }
@@ -239,7 +218,6 @@ namespace TPI.AdminTabs
             btnDelete.Enabled = false;
             LoadEquipments();
         }
-
         private void BtnCancel_Click(object sender, EventArgs e)
         {
             selectedEquipment = null;
@@ -249,7 +227,6 @@ namespace TPI.AdminTabs
             chkAvailable.Checked = false;
             btnSave.Enabled = true;
         }
-
         private void BtnDelete_Click(object sender, EventArgs e)
         {
             if (selectedEquipment == null)
@@ -260,12 +237,10 @@ namespace TPI.AdminTabs
                 MessageBox.Show("Ce matériel est actuellement en prêt et ne peut pas être supprimé.", "Suppression impossible", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
             var confirm = MessageBox.Show("Voulez-vous vraiment supprimer ce matériel ainsi que tous les prêts associés ?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (confirm == DialogResult.Yes)
             {
-                Lend.DeleteByEquipmentId(selectedEquipment.Id);
                 Equipment.Delete(selectedEquipment.Id);
 
                 selectedEquipment = null;

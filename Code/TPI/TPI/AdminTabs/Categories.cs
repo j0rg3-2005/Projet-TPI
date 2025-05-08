@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Windows.Forms;
-using TPI.Tables;
+﻿using TPI.Tables;
 
 namespace TPI.AdminTabs
 {
@@ -11,10 +7,8 @@ namespace TPI.AdminTabs
         private TableLayoutPanel tblCategories;
         private List<Category> categoryList;
         private Category selectedCategory;
-
         private TextBox txtName;
         private ComboBox cmbType;
-
         private Button btnSave;
         private Button btnCancel;
         private Button btnDelete;
@@ -25,7 +19,6 @@ namespace TPI.AdminTabs
             InitializeComponents();
             LoadCategories();
         }
-
         private void InitializeComponents()
         {
             this.Controls.Clear();
@@ -46,24 +39,10 @@ namespace TPI.AdminTabs
             tblCategories = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
-                ColumnCount = 4,
+                ColumnCount = 3,
                 AutoScroll = true,
                 CellBorderStyle = TableLayoutPanelCellBorderStyle.Single
             };
-
-            string[] headers = { "Nom", "Type", "Actions" };
-            foreach (var h in headers)
-                tblCategories.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / headers.Length));
-
-            for (int i = 0; i < headers.Length; i++)
-            {
-                tblCategories.Controls.Add(new Label()
-                {
-                    Text = headers[i],
-                    Font = new Font("Segoe UI", 10, FontStyle.Bold)
-                }, i, 0);
-            }
-
             mainLayout.Controls.Add(tblCategories, 0, 0);
 
             var rightPanel = new TableLayoutPanel
@@ -72,17 +51,16 @@ namespace TPI.AdminTabs
                 ColumnCount = 2,
                 AutoSize = true,
                 CellBorderStyle = TableLayoutPanelCellBorderStyle.None,
-                Padding = new Padding(10)
+                Padding = new Padding(10),
+                BorderStyle = BorderStyle.FixedSingle,
             };
             rightPanel.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
             rightPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
 
-            // Nom
             rightPanel.Controls.Add(new Label { Text = "Nom", Anchor = AnchorStyles.Right, AutoSize = true }, 0, 0);
             txtName = new TextBox { Width = 200 };
             rightPanel.Controls.Add(txtName, 1, 0);
 
-            // Type
             rightPanel.Controls.Add(new Label { Text = "Type", Anchor = AnchorStyles.Right, AutoSize = true }, 0, 1);
             cmbType = new ComboBox
             {
@@ -93,7 +71,6 @@ namespace TPI.AdminTabs
             cmbType.Items.Add("consommable");
             rightPanel.Controls.Add(cmbType, 1, 1);
 
-            // Boutons
             btnSave = new Button
             {
                 Text = "Enregistrer",
@@ -126,18 +103,17 @@ namespace TPI.AdminTabs
             rightPanel.Controls.Add(btnDelete, 1, 4);
             mainLayout.Controls.Add(rightPanel, 1, 0);
         }
-
         private void LoadCategories()
         {
             selectedCategory = null;
             categoryList = Category.GetAll();
-
             tblCategories.Controls.Clear();
             tblCategories.RowCount = 1;
 
-            string[] headers = { "Nom", "Type", "Actions" };
+            string[] headers = { "Nom", "Type", "Afficher infos" };
             for (int i = 0; i < headers.Length; i++)
             {
+                tblCategories.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / headers.Length));
                 tblCategories.Controls.Add(new Label()
                 {
                     Text = headers[i],
@@ -168,7 +144,6 @@ namespace TPI.AdminTabs
                 row++;
             }
         }
-
         private void BtnSelect_Click(object sender, EventArgs e)
         {
             if (sender is Button btn && btn.Tag is Category cat)
@@ -179,7 +154,6 @@ namespace TPI.AdminTabs
                 btnDelete.Enabled = true;
             }
         }
-
         private void BtnSave_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtName.Text) || cmbType.SelectedItem == null)
@@ -187,7 +161,6 @@ namespace TPI.AdminTabs
                 MessageBox.Show("Veuillez remplir tous les champs.");
                 return;
             }
-
             if (selectedCategory == null)
             {
                 Category.Insert(txtName.Text, cmbType.SelectedItem.ToString());
@@ -196,23 +169,19 @@ namespace TPI.AdminTabs
             {
                 Category.Update(selectedCategory.Id, txtName.Text, cmbType.SelectedItem.ToString());
             }
-
             ClearForm();
             LoadCategories();
         }
-
         private void BtnCancel_Click(object sender, EventArgs e)
         {
             ClearForm();
         }
-
         private void BtnDelete_Click(object sender, EventArgs e)
         {
             if (selectedCategory == null)
                 return;
 
             var confirm = MessageBox.Show("Voulez-vous vraiment supprimer cette catégorie ?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
             if (confirm == DialogResult.Yes)
             {
                 Category.Delete(selectedCategory.Id);
@@ -220,7 +189,6 @@ namespace TPI.AdminTabs
                 LoadCategories();
             }
         }
-
         private void ClearForm()
         {
             selectedCategory = null;

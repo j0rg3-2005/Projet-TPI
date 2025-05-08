@@ -1,7 +1,4 @@
 ﻿using MySqlConnector;
-using System;
-using System.Collections.Generic;
-
 namespace TPI.Tables
 {
     public class Request
@@ -45,10 +42,8 @@ namespace TPI.Tables
             {
                 Console.WriteLine($"Erreur lors de la récupération des demandes : {ex.Message}");
             }
-
             return requests;
         }
-
         public static Request GetById(int id)
         {
             try
@@ -76,12 +71,11 @@ namespace TPI.Tables
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Erreur GetById : " + ex.Message);
+                Console.WriteLine("Erreur : " + ex.Message);
             }
 
             return null;
         }
-
         public static void UpdateRequestStatus(int requestId, string newStatus)
         {
             try
@@ -93,11 +87,8 @@ namespace TPI.Tables
                     cmd.Parameters.AddWithValue("@id", requestId);
                     cmd.ExecuteNonQuery();
                 }
-
-                // Si on accepte, on décrémente le stock
                 if (newStatus == "accepté")
                 {
-                    // On récupère la requête pour connaître l'ID du consommable et la quantité demandée
                     Request req = GetById(requestId);
                     if (req != null)
                     {
@@ -112,14 +103,12 @@ namespace TPI.Tables
                 MessageBox.Show("Erreur : " + ex.Message);
             }
         }
-
         public static bool Add(DateTime requestDate, int userId, int consumableId, int quantity)
         {
             try
             {
-                string query = @"
-        INSERT INTO request (status, requestDate, consumableQuantity, userId, consumableId)
-        VALUES ('en attente', @requestDate, @quantity, @userId, @consumableId);";
+                string query = @" INSERT INTO request (status, requestDate, consumableQuantity, userId, consumableId)
+                VALUES ('en attente', @requestDate, @quantity, @userId, @consumableId);";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, Program.conn))
                 {

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Windows.Forms;
-using TPI.Tables;
-
+﻿using TPI.Tables;
 namespace TPI.AdminTabs
 {
     public partial class Lends : UserControl
@@ -12,7 +7,6 @@ namespace TPI.AdminTabs
         private TextBox txtSelectedLend;
         private List<Lend> lends;
         private Lend selectedLend;
-
         private Button btnAccept;
         private Button btnReject;
         private Button btnReturn;
@@ -23,12 +17,10 @@ namespace TPI.AdminTabs
             InitializeComponents();
             LoadLends();
         }
-
         private void InitializeComponents()
         {
             Controls.Clear();
             AutoScroll = true;
-
             var mainLayout = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -47,7 +39,6 @@ namespace TPI.AdminTabs
             var rightPanel = InitializeRightPanel();
             mainLayout.Controls.Add(rightPanel, 1, 0);
         }
-
         private void InitializeLendTable()
         {
             tblLends = new TableLayoutPanel
@@ -57,14 +48,7 @@ namespace TPI.AdminTabs
                 AutoScroll = true,
                 CellBorderStyle = TableLayoutPanelCellBorderStyle.Single
             };
-
-            string[] headers = { "ID", "Statut", "Début", "Fin", "Retour", "Utilisateur", "Action" };
-            foreach (var _ in headers)
-                tblLends.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / headers.Length));
-
-            AddHeaderRow(headers);
         }
-
         private FlowLayoutPanel InitializeRightPanel()
         {
             var panel = new FlowLayoutPanel
@@ -72,9 +56,9 @@ namespace TPI.AdminTabs
                 Dock = DockStyle.Fill,
                 FlowDirection = FlowDirection.TopDown,
                 AutoSize = true,
-                WrapContents = false
+                WrapContents = false,
+                BorderStyle = BorderStyle.FixedSingle,
             };
-
             btnAccept = CreateActionButton("Accepter la demande", BtnAccept_Click);
             btnReject = CreateActionButton("Refuser la demande", BtnReject_Click);
             btnReturn = CreateActionButton("Marquer comme retourné", BtnReturn_Click, enabled: false);
@@ -98,7 +82,6 @@ namespace TPI.AdminTabs
 
             return panel;
         }
-
         private Button CreateActionButton(string text, EventHandler handler, bool enabled = true)
         {
             var button = new Button
@@ -112,11 +95,11 @@ namespace TPI.AdminTabs
             button.Click += handler;
             return button;
         }
-
         private void AddHeaderRow(string[] headers)
         {
             for (int i = 0; i < headers.Length; i++)
             {
+                tblLends.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / headers.Length));
                 tblLends.Controls.Add(new Label()
                 {
                     Text = headers[i],
@@ -124,7 +107,6 @@ namespace TPI.AdminTabs
                 }, i, 0);
             }
         }
-
         private void LoadLends()
         {
             selectedLend = null;
@@ -133,24 +115,22 @@ namespace TPI.AdminTabs
             tblLends.Controls.Clear();
             tblLends.RowCount = 1;
 
-            string[] headers = { "ID", "Statut", "Début", "Fin", "Retour", "Utilisateur", "Action" };
+            string[] headers = { "Statut", "Début", "Fin", "Retour", "Utilisateur", "Matériel", "Afficher infos" };
             AddHeaderRow(headers);
 
             int row = 1;
             foreach (var lend in lends)
-                AddLendRow(lend, row++);
+            AddLendRow(lend, row++);
         }
-
         private void AddLendRow(Lend lend, int row)
         {
             tblLends.RowCount++;
-
-            tblLends.Controls.Add(new Label() { Text = lend.Id.ToString() }, 0, row);
-            tblLends.Controls.Add(new Label() { Text = lend.Status }, 1, row);
-            tblLends.Controls.Add(new Label() { Text = lend.StartDate?.ToShortDateString() ?? "-" }, 2, row);
-            tblLends.Controls.Add(new Label() { Text = lend.EndDate?.ToShortDateString() ?? "-" }, 3, row);
-            tblLends.Controls.Add(new Label() { Text = lend.ReturnDate?.ToShortDateString() ?? "-" }, 4, row);
-            tblLends.Controls.Add(new Label() { Text = lend.UserId.ToString() }, 5, row);
+            tblLends.Controls.Add(new Label() { Text = lend.Status }, 0, row);
+            tblLends.Controls.Add(new Label() { Text = lend.StartDate?.ToShortDateString() ?? "-" }, 1, row);
+            tblLends.Controls.Add(new Label() { Text = lend.EndDate?.ToShortDateString() ?? "-" }, 2, row);
+            tblLends.Controls.Add(new Label() { Text = lend.ReturnDate?.ToShortDateString() ?? "-" }, 3, row);
+            tblLends.Controls.Add(new Label() { Text = User.GetUserById(lend.UserId).FirstName + " " + User.GetUserById(lend.UserId).LastName }, 4, row);
+            tblLends.Controls.Add(new Label() { Text = Equipment.GetById(lend.EquipmentId).Model }, 4, row);
 
             var btnShow = new Button()
             {
@@ -160,31 +140,26 @@ namespace TPI.AdminTabs
                 Height = 25
             };
             btnShow.Click += BtnShow_Click;
-
-            tblLends.Controls.Add(btnShow, 6, row);
+            tblLends.Controls.Add(btnShow, 5, row);
         }
-
         private void BtnShow_Click(object sender, EventArgs e)
         {
             if (sender is Button btn && btn.Tag is Lend lend)
             {
                 selectedLend = lend;
-
-                txtSelectedLend.Text = $"ID: {lend.Id}\r\n" +
-                                       $"Statut: {lend.Status}\r\n" +
-                                       $"Date début: {lend.StartDate}\r\n" +
-                                       $"Date fin: {lend.EndDate}\r\n" +
-                                       $"Date de retour: {lend.ReturnDate}\r\n" +
-                                       $"Date demande: {lend.RequestDate}\r\n" +
-                                       $"Utilisateur: {lend.UserId}\r\n" +
-                                       $"Équipement: {lend.EquipmentId}";
+                txtSelectedLend.Text = $"Statut: {lend.Status}\r\n" +
+                                       $"Date début: {lend.StartDate?.ToShortDateString()}\r\n" +
+                                       $"Date fin: {lend.EndDate?.ToShortDateString()}\r\n" +
+                                       $"Date de retour: {lend.ReturnDate?.ToShortDateString()}\r\n" +
+                                       $"Date demande: {lend.RequestDate?.ToShortDateString()}\r\n" +
+                                       $"Utilisateur: {User.GetUserById(lend.UserId).FirstName + " " + User.GetUserById(lend.UserId).LastName}\r\n" +
+                                       $"Matériel: {Equipment.GetById(lend.EquipmentId).Model}";
 
                 btnAccept.Enabled = lend.Status == "en attente";
                 btnReject.Enabled = lend.Status == "en attente";
                 btnReturn.Enabled = lend.Status == "accepté";
             }
         }
-
         private void BtnAccept_Click(object sender, EventArgs e)
         {
             if (selectedLend == null) return;
@@ -203,7 +178,6 @@ namespace TPI.AdminTabs
                     return;
                 }
             }
-
             selectedLend.Status = "accepté";
             selectedLend.StartDate = DateTime.Now;
             selectedLend.Update();
@@ -211,7 +185,6 @@ namespace TPI.AdminTabs
             LoadLends();
             txtSelectedLend.Text = "Demande acceptée.";
         }
-
         private void BtnReject_Click(object sender, EventArgs e)
         {
             if (selectedLend == null) return;
@@ -223,7 +196,6 @@ namespace TPI.AdminTabs
             txtSelectedLend.Text = "Demande refusée.";
             selectedLend = null;
         }
-
         private void BtnReturn_Click(object sender, EventArgs e)
         {
             if (selectedLend == null || selectedLend.Status != "accepté") return;

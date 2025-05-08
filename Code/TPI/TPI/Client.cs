@@ -44,12 +44,10 @@ namespace TPI
             }
             public override string ToString() => DisplayText;
         }
-
         public void frmClient_Load(object sender, EventArgs e)
         {
             InitializeClientUI();
         }
-
         public void InitializeClientUI()
         {
             this.Controls.Clear();
@@ -67,7 +65,7 @@ namespace TPI
 
             txtSearch = new TextBox();
             txtSearch.Width = 250;
-            txtSearch.PlaceholderText = "Rechercher un équipement...";
+            txtSearch.PlaceholderText = "Rechercher";
             txtSearch.Top = paddingMargin;
             txtSearch.Left = (this.ClientSize.Width - txtSearch.Width - 100 - paddingMargin) / 2;
             this.Controls.Add(txtSearch);
@@ -103,7 +101,7 @@ namespace TPI
             btnShowAdmin.AutoSize = true;
             btnShowAdmin.Width = 100;
             btnShowAdmin.Top = paddingMargin;
-            btnShowAdmin.Left = txtSearch.Right + btnSearch.Width + btnShowEquipment.Width + btnShowConsummables.Width + paddingMargin * 5;
+            btnShowAdmin.Left = txtSearch.Right + btnSearch.Width + btnShowEquipment.Width + btnShowConsummables.Width + paddingMargin * 8;
             btnShowAdmin.Click += btnShowAdmin_Click;
             if (Session.Role == "Administrateur")
             {
@@ -148,18 +146,19 @@ namespace TPI
             AddEquipmentsToTable(equipments);
 
         }
-
         private void InitializeEquipmentLendPanel()
         {
             pnlAddEquipment.Controls.Clear();
 
-            Label lblModel = new Label() { Text = "Modèle:", Left = 10, Top = 50, AutoSize = true };
-            cmbModel = new ComboBox() { Left = 120, Top = 50, Width = 200 };
+            Label lblFormName = new Label() { Text = "FORMULAIRE DE PRÊT DE MATÉRIEL", Left = 10, Top = 20, Font = new Font("Segoe UI", 10, FontStyle.Bold), AutoSize = true };
+
+            Label lblModel = new Label() { Text = "Modèle:", Left = 10, Top = 80, AutoSize = true };
+            cmbModel = new ComboBox() { Left = 120, Top = 80, Width = 200 };
             cmbModel.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbModel.Enabled = false;
 
-            Label lblCategory = new Label() { Text = "Catégorie :", Left = 10, Top = 20, AutoSize = true };
-            cmbCategory = new ComboBox() { Left = 120, Top = 20, Width = 200 };
+            Label lblCategory = new Label() { Text = "Catégorie :", Left = 10, Top = 50, AutoSize = true };
+            cmbCategory = new ComboBox() { Left = 120, Top = 50, Width = 200 };
             cmbCategory.DropDownStyle = ComboBoxStyle.DropDownList;
             List<Category> categories = Category.GetAllEquipment();
             foreach (var category in categories)
@@ -167,15 +166,14 @@ namespace TPI
                 cmbCategory.Items.Add((category.Name));
             }
 
-            Label lblDate = new Label() { Text = "Date de début/fin:", Left = 10, Top = 80, AutoSize = true };
+            Label lblDate = new Label() { Text = "Date de début/fin:", Left = 10, Top = 110, AutoSize = true };
             monthCalendar = new MonthCalendar();
-            monthCalendar.Location = new Point(120, 80);
+            monthCalendar.Location = new Point(120, 110);
             monthCalendar.MaxSelectionCount = 14;
             monthCalendar.ShowToday = true;
             monthCalendar.ShowTodayCircle = true;
 
-
-            Button btnSubmit = new Button() { Text = "Soumettre", Left = 120, Top = 250 };
+            Button btnSubmit = new Button() { Text = "Ajouter au panier", Left = 120, Top = 280, AutoSize = true };
 
             cmbCategory.SelectedIndexChanged += (s, ev) =>
             {
@@ -196,7 +194,6 @@ namespace TPI
 
             btnSubmit.Click += (sender, e) =>
             {
-                // Vérification de l'élément sélectionné dans le ComboBox
                 var selectedItem = cmbModel.SelectedItem as ComboBoxItem;
                 int itemId = selectedItem?.Id ?? 0;
 
@@ -206,11 +203,9 @@ namespace TPI
                     return;
                 }
 
-                // Récupérer les dates sélectionnées
                 DateTime startDate = monthCalendar.SelectionStart.Date;
                 DateTime endDate = monthCalendar.SelectionEnd.Date;
 
-                // Vérifier les dates réservées existantes
                 List<(DateTime start, DateTime end)> reservedDates = Lend.GetReservedDates(itemId);
                 foreach (var range in reservedDates)
                 {
@@ -224,7 +219,6 @@ namespace TPI
                 }
 
                 EquipmentCartItems.Add((selectedItem.DisplayText, itemId, startDate, endDate));
-
                 UpdateCartTable();
 
                 cmbModel.SelectedIndex = -1;
@@ -232,12 +226,11 @@ namespace TPI
                 monthCalendar.SetSelectionRange(DateTime.Today, DateTime.Today.AddDays(1));
             };
 
-
             tblCart = new TableLayoutPanel();
             tblCart.Dock = DockStyle.Fill;
             tblCart.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
             tblCart.Left = 60;
-            tblCart.Top = 500;
+            tblCart.Top = 350;
             tblCart.Width = (int)(pnlAddEquipment.Width * 0.75);
             tblCart.Anchor = AnchorStyles.None;
             tblCart.AutoScroll = true;
@@ -249,7 +242,8 @@ namespace TPI
                 Left = tblCart.Left,
                 Top = tblCart.Bottom + 10,
                 Width = tblCart.Width,
-                Height = 30
+                Height = 30,
+                AutoSize = true,
             };
             btnValidateEquipment.Click += (s, e) =>
             {
@@ -258,8 +252,7 @@ namespace TPI
                     MessageBox.Show("Le panier est vide.");
                     return;
                 }
-
-                var availableEquipment = Equipment.GetAllAvailableEquipment();
+                var availableEquipment = Equipment.GetAll();
 
                 foreach (var item in EquipmentCartItems)
                 {
@@ -286,7 +279,7 @@ namespace TPI
                 UpdateCartTable();
             };
 
-
+            pnlAddEquipment.Controls.Add(lblFormName);
             pnlAddEquipment.Controls.Add(lblModel);
             pnlAddEquipment.Controls.Add(lblDate);
             pnlAddEquipment.Controls.Add(cmbModel);
@@ -301,8 +294,10 @@ namespace TPI
         {
             pnlAddEquipment.Controls.Clear();
 
-            Label lblCategory = new Label() { Text = "Catégorie :", Left = 10, Top = 20, AutoSize = true };
-            ComboBox cmbCategoryCons = new ComboBox() { Left = 120, Top = 20, Width = 200 };
+            Label lblFormName = new Label() { Text = "FORMULAIRE DE DEMANDE DE CONSOMMABLES", Left = 10, Top = 20, Font = new Font("Segoe UI", 10, FontStyle.Bold), AutoSize = true };
+
+            Label lblCategory = new Label() { Text = "Catégorie :", Left = 10, Top = 50, AutoSize = true };
+            ComboBox cmbCategoryCons = new ComboBox() { Left = 120, Top = 50, Width = 200 };
             cmbCategoryCons.DropDownStyle = ComboBoxStyle.DropDownList;
             List<Category> categories = Category.GetAllConsumables();
             foreach (var category in categories)
@@ -310,15 +305,15 @@ namespace TPI
                 cmbCategoryCons.Items.Add(category.Name);
             }
 
-            Label lblModel = new Label() { Text = "Modèle :", Left = 10, Top = 60, AutoSize = true };
-            ComboBox cmbModelCons = new ComboBox() { Left = 120, Top = 60, Width = 200 };
+            Label lblModel = new Label() { Text = "Modèle :", Left = 10, Top = 80, AutoSize = true };
+            ComboBox cmbModelCons = new ComboBox() { Left = 120, Top = 80, Width = 200 };
             cmbModelCons.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbModelCons.Enabled = false;
 
-            Label lblQuantity = new Label() { Text = "Quantité :", Left = 10, Top = 100, AutoSize = true };
-            NumericUpDown nudQuantity = new NumericUpDown() { Left = 120, Top = 100, Width = 100, Minimum = 1 };
+            Label lblQuantity = new Label() { Text = "Quantité :", Left = 10, Top = 110, AutoSize = true };
+            NumericUpDown nudQuantity = new NumericUpDown() { Left = 120, Top = 110, Width = 100, Minimum = 1 };
 
-            Button btnAddToCart = new Button() { Text = "Ajouter au panier", Left = 120, Top = 150 };
+            Button btnAddToCart = new Button() { Text = "Ajouter au panier", Left = 120, Top = 150, AutoSize = true };
 
             cmbCategoryCons.SelectedIndexChanged += (s, e) =>
             {
@@ -329,7 +324,7 @@ namespace TPI
                     List<Consumable> cons = Consumable.Search(cmbCategoryCons.SelectedItem.ToString());
                     foreach (var c in cons)
                     {
-                        cmbModelCons.Items.Add(new ComboBoxItem(c.Id, $"{c.Id} - {c.Model}"));
+                        cmbModelCons.Items.Add(new ComboBoxItem(c.Id, $"{c.Model}"));
                     }
                 }
             };
@@ -349,35 +344,27 @@ namespace TPI
 
             btnAddToCart.Click += (s, e) =>
             {
-                // Vérification si un modèle et une catégorie sont sélectionnés
                 if (cmbCategoryCons.SelectedItem == null || cmbModelCons.SelectedItem == null)
                 {
                     MessageBox.Show("Veuillez sélectionner une catégorie et un modèle.");
                     return;
                 }
-
-                // Vérification du type de l'élément sélectionné dans cmbModelCons
                 if (cmbModelCons.SelectedItem is ComboBoxItem selected)
                 {
-                    // Récupérer les informations du modèle et de l'ID
-                    string model = selected.DisplayText.Split('-')[1].Trim(); // Récupère le modèle à partir de l'affichage
-                    int id = selected.Id; // Récupère l'ID du modèle
-                    int quantity = (int)nudQuantity.Value; // Quantité sélectionnée
+                    string model = Consumable.GetById(selected.Id).Model;
+                    int id = selected.Id;
+                    int quantity = (int)nudQuantity.Value;
 
-                    // Ajouter l'élément au panier
                     ConsumableCartItems.Add((model, id, quantity));
 
-                    // Mettre à jour la table du panier
                     UpdateCartTable();
 
-                    // Réinitialiser les sélections
                     cmbModelCons.SelectedIndex = -1;
                     cmbCategoryCons.SelectedIndex = -1;
                     nudQuantity.Value = 1;
                 }
                 else
                 {
-                    // Si l'élément sélectionné n'est pas de type ComboBoxItem
                     MessageBox.Show("Veuillez sélectionner un modèle valide.");
                 }
             };
@@ -415,11 +402,12 @@ namespace TPI
                     Request.Add(DateTime.Today, Session.UserId, consumableId, quantity);
                 }
 
-                MessageBox.Show("Demande de consommables validée avec succès !");
+                MessageBox.Show("Les demandes ont été envoyées avec succès !");
                 ConsumableCartItems.Clear();
                 UpdateCartTable();
             };
 
+            pnlAddEquipment.Controls.Add(lblFormName);
             pnlAddEquipment.Controls.Add(lblCategory);
             pnlAddEquipment.Controls.Add(cmbCategoryCons);
             pnlAddEquipment.Controls.Add(lblModel);
@@ -464,13 +452,11 @@ namespace TPI
                 }
             }
         }
-
         private void UpdateReservedDates()
         {
             if (cmbModel.SelectedItem is ComboBoxItem selectedItem)
             {
                 List<(DateTime start, DateTime end)> reservedDates = Lend.GetReservedDates(selectedItem.Id);
-
                 monthCalendar.RemoveAllBoldedDates();
 
                 foreach (var range in reservedDates)
@@ -482,7 +468,6 @@ namespace TPI
                         current = current.AddDays(1);
                     }
                 }
-
                 monthCalendar.UpdateBoldedDates();
 
                 foreach (var range in reservedDates)
@@ -496,7 +481,6 @@ namespace TPI
                 }
             }
         }
-
         private void AddEquipmentsToTable(List<Equipment> equipments)
         {
             tblEquipment.Controls.Clear();
@@ -518,11 +502,10 @@ namespace TPI
                 btnShowEquipmentInfo.Click += (s, ev) =>
                 {
                     txtSelectedEquipmentId.Text = "INFOS DE L'ÉQUIPEMENT" +
-                    "\r\n\r\n- ID : " + equipment.Id.ToString() +
                     "\r\n\r\n- Modèle : " + equipment.Model +
                     "\r\n\r\n- Numéro d'inventaire : " + equipment.InventoryNumber +
                     "\r\n\r\n- Numéro de série : " + equipment.SerialNumber +
-                    "\r\n\r\n- Catégorie : " + Category.GetById(equipment.Id).ToString() +
+                    "\r\n\r\n- Catégorie : " + Category.GetById(equipment.CategoryId).Name +
                     "\r\n\r\n- Disponible : " + (equipment.Available ? "Oui" : "Non");
                 };
 
@@ -537,7 +520,6 @@ namespace TPI
             flpMain.Controls.Add(tblEquipment);
             flpMain.Controls.Add(pnlAddEquipment);
         }
-
         private void AddConsumablesToTable(List<Consumable> consumables)
         {
             flpMain.Controls.Remove(tblEquipment);
@@ -547,7 +529,7 @@ namespace TPI
             foreach (var consumable in consumables)
             {
                 Label lblConsumable = new Label();
-                lblConsumable.Text = $"ID: {consumable.Id} - Modèle: {consumable.Model}"; // Affiche ID et modèle
+                lblConsumable.Text = "Modèle: " + consumable.Model;
                 lblConsumable.Anchor = AnchorStyles.None;
                 lblConsumable.Padding = new Padding(5);
                 lblConsumable.AutoSize = true;
@@ -560,18 +542,16 @@ namespace TPI
                 btnShowInfo.Click += (s, ev) =>
                 {
                     txtSelectedEquipmentId.Text = "INFOS DU CONSOMMABLE" +
-                    "\r\n\r\n- ID : " + consumable.Id.ToString() +
                     "\r\n\r\n- Modèle : " + consumable.Model +
                     "\r\n\r\n- Stock : " + consumable.Stock +
                     "\r\n\r\n- Min stock : " + consumable.MinStock +
-                    "\r\n\r\n- Catégorie ID : " + consumable.CategoryId.ToString();
+                    "\r\n\r\n- Catégorie : " + Category.GetById(consumable.CategoryId).Name;
                 };
 
                 tblEquipment.RowCount++;
                 tblEquipment.Controls.Add(lblConsumable, 0, tblEquipment.RowCount);
                 tblEquipment.Controls.Add(btnShowInfo, 1, tblEquipment.RowCount);
             }
-
             tblEquipment.RowCount++;
             tblEquipment.Controls.Add(new Label(), 0, tblEquipment.RowCount);
             tblEquipment.Controls.Add(new Label(), 1, tblEquipment.RowCount);
@@ -580,7 +560,6 @@ namespace TPI
             flpMain.Controls.Add(tblEquipment);
             flpMain.Controls.Add(pnlAddEquipment);
         }
-
         private void BtnSearch_Click(object sender, EventArgs e)
         {
             string searchTerm = txtSearch.Text.Trim();
@@ -601,16 +580,14 @@ namespace TPI
                 AddConsumablesToTable(filteredConsumables);
             }
         }
-
         private void btnShowEquipment_Click(object sender, EventArgs e)
         {
             currentView = ViewMode.Equipment;
-            List<Equipment> equipments = Equipment.GetAllAvailableEquipment();
+            List<Equipment> equipments = Equipment.GetAll();
             flpMain.Controls.Clear();
             InitializeEquipmentLendPanel();
             AddEquipmentsToTable(equipments);
         }
-
         private void btnShowConsummables_Click(object sender, EventArgs e)
         {
             currentView = ViewMode.Consumables;
@@ -619,7 +596,6 @@ namespace TPI
             InitializeConsumableRequestPanel();
             AddConsumablesToTable(consumables);
         }
-
         private void btnShowAdmin_Click(object sender, EventArgs e)
         {
             frmAdministrator frmAdministrator = new frmAdministrator();

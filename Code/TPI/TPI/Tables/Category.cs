@@ -8,11 +8,9 @@ namespace TPI.Tables
         public string Name { get; set; }
         public string Type { get; set; }
 
-        // Méthode pour récupérer toutes les catégories
         public static List<Category> GetAll()
         {
             List<Category> categories = new List<Category>();
-
             try
             {
                 string query = "SELECT * FROM categories";
@@ -37,14 +35,11 @@ namespace TPI.Tables
             {
                 Console.WriteLine($"Erreur lors de la récupération des catégories : {ex.Message}");
             }
-
             return categories;
         }
-
         public static Category GetById(int id)
         {
             Category cat = null;
-
             try
             {
                 string query = "SELECT * FROM categories WHERE id = @id";
@@ -72,11 +67,9 @@ namespace TPI.Tables
 
             return cat;
         }
-
         public static List<Category> GetAllEquipment()
         {
             List<Category> categories = new List<Category>();
-
             try
             {
                 string query = "SELECT * FROM categories WHERE type = \"matériel\"";
@@ -91,24 +84,19 @@ namespace TPI.Tables
                         Name = reader["name"] != DBNull.Value ? reader["name"].ToString() : string.Empty,
                         Type = reader["type"] != DBNull.Value ? reader["type"].ToString() : string.Empty
                     };
-
                     categories.Add(cat);
                 }
-
                 reader.Close();
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Erreur lors de la récupération des catégories : {ex.Message}");
             }
-
             return categories;
         }
-
         public static List<Category> GetAllConsumables()
         {
             List<Category> categories = new List<Category>();
-
             try
             {
                 string query = "SELECT * FROM categories WHERE type = \"consommable\"";
@@ -125,17 +113,14 @@ namespace TPI.Tables
                     };
                     categories.Add(cat);
                 }
-
                 reader.Close();
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Erreur lors de la récupération des catégories : {ex.Message}");
             }
-
             return categories;
         }
-
         public static void Insert(string name, string type)
         {
             try
@@ -153,7 +138,6 @@ namespace TPI.Tables
                 Console.WriteLine("Erreur lors de l'insertion de la catégorie : " + ex.Message);
             }
         }
-
         public static void Update(int id, string name, string type)
         {
             try
@@ -172,7 +156,6 @@ namespace TPI.Tables
                 Console.WriteLine("Erreur lors de la mise à jour de la catégorie : " + ex.Message);
             }
         }
-
         public static void Delete(int id)
         {
             try

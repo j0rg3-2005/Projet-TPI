@@ -1,5 +1,4 @@
 ﻿using MySqlConnector;
-
 namespace TPI.Tables
 {
     public class Consumable
@@ -10,11 +9,9 @@ namespace TPI.Tables
         public int MinStock { get; set; }
         public int CategoryId { get; set; }
 
-        // Récupérer tous les consommables
         public static List<Consumable> GetAll()
         {
             List<Consumable> consumablesList = new List<Consumable>();
-
             try
             {
                 string query = "SELECT * FROM consumables";
@@ -39,11 +36,8 @@ namespace TPI.Tables
             {
                 Console.WriteLine($"Erreur lors de la récupération des consommables : {ex.Message}");
             }
-
             return consumablesList;
         }
-
-        // Rechercher des consommables par modèle, stock ou catégorie
         public static List<Consumable> Search(string searchTerm)
         {
             List<Consumable> result = new List<Consumable>();
@@ -59,40 +53,17 @@ namespace TPI.Tables
                     result.Add(cons);
                 }
             }
-
             return result;
         }
-
-        // Ajouter un consommable dans la base de données
-        public static void AddConsumable(string model, int stock, int minStock, int categoryId)
-        {
-            try
-            {
-                string query = "INSERT INTO consumables (model, stock, minStock, categoryId) VALUES (@Model, @Stock, @MinStock, @CategoryId)";
-                MySqlCommand cmd = new MySqlCommand(query, Program.conn);
-                cmd.Parameters.AddWithValue("@Model", model);
-                cmd.Parameters.AddWithValue("@Stock", stock);
-                cmd.Parameters.AddWithValue("@MinStock", minStock);
-                cmd.Parameters.AddWithValue("@CategoryId", categoryId);
-                cmd.ExecuteNonQuery();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Erreur lors de l'ajout du consommable : {ex.Message}");
-            }
-        }
-
         public static Consumable GetById(int id)
         {
             Consumable consumable = null;
-
             try
             {
                 string query = "SELECT * FROM consumables WHERE id = @Id";
                 MySqlCommand cmd = new MySqlCommand(query, Program.conn);
                 cmd.Parameters.AddWithValue("@Id", id);
                 MySqlDataReader reader = cmd.ExecuteReader();
-
                 if (reader.Read())
                 {
                     consumable = new Consumable
@@ -104,17 +75,14 @@ namespace TPI.Tables
                         CategoryId = reader["categoryId"] != DBNull.Value ? Convert.ToInt32(reader["categoryId"]) : 0
                     };
                 }
-
                 reader.Close();
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Erreur lors de la récupération du consommable par ID : {ex.Message}");
             }
-
             return consumable;
         }
-        
         public static void DecreaseQuantity(int consumableId, int quantity)
         {
             try
