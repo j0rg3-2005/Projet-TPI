@@ -131,7 +131,7 @@ namespace TPI
             frmconnection frmconnection = new frmconnection();
             frmconnection.Show();
             this.Hide();
-            frmconnection.FormClosed += (s, args) => this.Show();
+            frmconnection.FormClosed += (s, args) => this.Close();
         }
         private void BtnRegister_Click(object sender, EventArgs e)
         {
@@ -140,12 +140,17 @@ namespace TPI
             string email = txtEmail.Text;
             string motDePasse = txtPassword.Text;
 
+            if (User.IsValidEmail(email) == false)
+            {
+                MessageBox.Show("Veuillez entrer une adresse email valide.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
             string resultMessage = User.RegisterUser(prenom, nom, email, motDePasse);
 
             frmconnection frmconnection = new frmconnection();
             frmconnection.Show();
             this.Hide();
-            frmconnection.FormClosed += (s, args) => this.Show();
+            frmconnection.FormClosed += (s, args) => this.Close();
         }
     }
 }

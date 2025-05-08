@@ -15,7 +15,6 @@ namespace TPI
         {
             InitializeComponent();
         }
-
         private void frmconnection_Load(object sender, EventArgs e)
         {
             this.Text = "Connexion";
@@ -96,7 +95,6 @@ namespace TPI
             btnSignUp.Click += btnSignUp_Click;
             pnlConnection.Controls.Add(btnSignUp);
         }
-
         private void btnLogin_Click(object sender, EventArgs e)
         {
             var user = Tables.User.GetUser(txtEmail.Text, txtPassword.Text);
@@ -113,7 +111,7 @@ namespace TPI
                 frmClient.Show();
                 frmClient.FormClosed += (s, args) =>
                 {
-                    this.Show();
+                    this.Close();
                     Session.Clear();
                 };
             }
@@ -122,13 +120,12 @@ namespace TPI
                 MessageBox.Show("Email ou mot de passe incorrect.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
         private void btnSignUp_Click(object sender, EventArgs e)
         {
             frmSignUp frmSignUp = new frmSignUp();
             frmSignUp.Show();
             this.Hide();
-            frmSignUp.FormClosed += (s, args) => this.Show();
+            frmSignUp.FormClosed += (s, args) => this.Close();
         }
     }
 }

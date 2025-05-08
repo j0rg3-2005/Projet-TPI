@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS equipment (
     available BOOLEAN NOT NULL DEFAULT TRUE,
     serialNumber TEXT,
     categoryId INT,
-    FOREIGN KEY (categoryId) REFERENCES categories(id)
+    FOREIGN KEY (categoryId) REFERENCES categories(id) ON DELETE CASCADE
 );
 
 -- Consumables table
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS consumables (
     stock INT NOT NULL,
     minStock INT NOT NULL,
     categoryId INT,
-    FOREIGN KEY (categoryId) REFERENCES categories(id)
+    FOREIGN KEY (categoryId) REFERENCES categories(id) ON DELETE CASCADE
 );
 
 -- Borrow table (equipment loan)
@@ -48,22 +48,21 @@ CREATE TABLE IF NOT EXISTS lends (
     startDate DATETIME NOT NULL,
     endDate DATETIME NOT NULL,
     requestDate DATETIME NOT NULL,
-	returnDate DATETIME,
+    returnDate DATETIME,
     userId INT,
     equipmentId INT,
-    FOREIGN KEY (userId) REFERENCES users(id),
-    FOREIGN KEY (equipmentId) REFERENCES equipment(id)
+    FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (equipmentId) REFERENCES equipment(id) ON DELETE CASCADE
 );
 
 -- Request table (consumable request)
-
 CREATE TABLE IF NOT EXISTS request (
     id INT PRIMARY KEY AUTO_INCREMENT,
     status TEXT NOT NULL,
     requestDate DATETIME NOT NULL,
-    consumableQuantity INT NOT NULL	,
+    consumableQuantity INT NOT NULL,
     userId INT,
     consumableId INT,
-    FOREIGN KEY (userId) REFERENCES users(id),
-    FOREIGN KEY (consumableId) REFERENCES consumables(id)
+    FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (consumableId) REFERENCES consumables(id) ON DELETE CASCADE
 );

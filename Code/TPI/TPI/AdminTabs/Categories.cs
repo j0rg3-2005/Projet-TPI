@@ -126,7 +126,7 @@ namespace TPI.AdminTabs
             {
                 tblCategories.RowCount++;
 
-                var lblName = new Label { Text = cat.Name };
+                var lblName = new Label { Text = cat.Name, AutoSize = true};
                 var lblType = new Label { Text = cat.Type };
                 var btnSelect = new Button
                 {

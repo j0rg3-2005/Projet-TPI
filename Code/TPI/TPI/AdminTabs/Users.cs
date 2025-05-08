@@ -1,4 +1,5 @@
 ﻿using TPI.Tables;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 namespace TPI.AdminTabs
 {
     public partial class Users : UserControl
@@ -189,21 +190,25 @@ namespace TPI.AdminTabs
             if (selectedUser == null)
                 return;
 
-            if (string.IsNullOrWhiteSpace(txtLastName.Text) ||
+                if (string.IsNullOrWhiteSpace(txtLastName.Text) ||
                 string.IsNullOrWhiteSpace(txtFirstName.Text) ||
                 string.IsNullOrWhiteSpace(txtEmail.Text) ||
                 cmbRole.SelectedItem == null)
+                {
+                    MessageBox.Show("Veuillez remplir tous les champs.");
+                    return;
+                }
+            if (User.IsValidEmail(txtEmail.Text))
             {
-                MessageBox.Show("Veuillez remplir tous les champs.");
-                return;
+                User.Update(selectedUser.Id,
+                            txtLastName.Text,
+                            txtFirstName.Text,
+                            txtEmail.Text,
+                            cmbRole.SelectedItem.ToString());
+                ClearForm();
+                LoadUsers();
             }
-            User.Update(selectedUser.Id,
-                        txtLastName.Text,
-                        txtFirstName.Text,
-                        txtEmail.Text,
-                        cmbRole.SelectedItem.ToString());
-            ClearForm();
-            LoadUsers();
+            else { MessageBox.Show("Veuillez rentrer une addresse mail valide."); }
         }
         private void BtnCancel_Click(object sender, EventArgs e)
         {

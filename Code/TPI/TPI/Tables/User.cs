@@ -27,6 +27,12 @@ namespace TPI.Tables
                 return builder.ToString();
             }
         }
+        public static bool IsValidEmail(string email)
+        {
+            string pattern = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
+            var regex = new System.Text.RegularExpressions.Regex(pattern);
+            return regex.IsMatch(email);
+        }
         public static string RegisterUser(string firstName, string lastName, string email, string password)
         {
             if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))

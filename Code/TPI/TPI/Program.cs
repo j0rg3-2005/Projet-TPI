@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using MySqlConnector;
 
 namespace TPI
@@ -9,13 +10,16 @@ namespace TPI
         [STAThread]
         static void Main(string[] args)
         {
-            string server = "localhost";
-            string database = "tpi";
-            string username = "root";
-            string password = "Pa$$w0rd";
-            string constring = "SERVER=" + server + ";" + "DATABASE=" + database + ";" +
-                "UID=" + username + ";" + "PASSWORD=" + password + ";";
-            // A revoir
+            var config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            var server = config["Database:Server"];
+            var database = config["Database:Database"];
+            var username = config["Database:Username"];
+            var password = config["Database:Password"];
+
+            string constring = $"SERVER={server};DATABASE={database};UID={username};PASSWORD={password};";
             conn = new MySqlConnection(constring);
             conn.Open();
 

@@ -115,7 +115,7 @@ namespace TPI.AdminTabs
             tblLends.Controls.Clear();
             tblLends.RowCount = 1;
 
-            string[] headers = { "Statut", "Début", "Fin", "Retour", "Utilisateur", "Matériel", "Afficher infos" };
+            string[] headers = { "Statut", "Début", "Fin", "Retour", "Matériel", "Utilisateur" , "Afficher infos" };
             AddHeaderRow(headers);
 
             int row = 1;

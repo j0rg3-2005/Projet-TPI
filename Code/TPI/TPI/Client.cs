@@ -103,7 +103,7 @@ namespace TPI
             btnShowAdmin.Top = paddingMargin;
             btnShowAdmin.Left = txtSearch.Right + btnSearch.Width + btnShowEquipment.Width + btnShowConsummables.Width + paddingMargin * 8;
             btnShowAdmin.Click += btnShowAdmin_Click;
-            if (Session.Role == "Administrateur")
+            if (Session.Role == "administrateur")
             {
                 this.Controls.Add(btnShowAdmin);
             }

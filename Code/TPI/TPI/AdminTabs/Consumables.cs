@@ -1,4 +1,9 @@
 ﻿using TPI.Tables;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
+
 namespace TPI.AdminTabs
 {
     public partial class Consumables : UserControl
@@ -7,8 +12,8 @@ namespace TPI.AdminTabs
         private List<Consumable> consumableList;
         private Consumable selectedConsumable;
         private TextBox txtModel;
-        private TextBox txtStock;
-        private TextBox txtMinStock;
+        private NumericUpDown nudStock;
+        private NumericUpDown nudMinStock;
         private ComboBox cmbCategory;
         private Button btnSave;
         private Button btnCancel;
@@ -44,7 +49,6 @@ namespace TPI.AdminTabs
                 AutoScroll = true,
                 CellBorderStyle = TableLayoutPanelCellBorderStyle.Single
             };
-
             mainLayout.Controls.Add(tblConsumables, 0, 0);
 
             var rightPanel = new TableLayoutPanel
@@ -61,12 +65,12 @@ namespace TPI.AdminTabs
             rightPanel.Controls.Add(txtModel, 1, 0);
 
             rightPanel.Controls.Add(new Label { Text = "Stock", Anchor = AnchorStyles.Right, AutoSize = true }, 0, 1);
-            txtStock = new TextBox();
-            rightPanel.Controls.Add(txtStock, 1, 1);
+            nudStock = new NumericUpDown { Minimum = 0, Maximum = 1000000, Anchor = AnchorStyles.Left };
+            rightPanel.Controls.Add(nudStock, 1, 1);
 
             rightPanel.Controls.Add(new Label { Text = "Stock Min", Anchor = AnchorStyles.Right, AutoSize = true }, 0, 2);
-            txtMinStock = new TextBox();
-            rightPanel.Controls.Add(txtMinStock, 1, 2);
+            nudMinStock = new NumericUpDown { Minimum = 0, Maximum = 1000000, Anchor = AnchorStyles.Left };
+            rightPanel.Controls.Add(nudMinStock, 1, 2);
 
             rightPanel.Controls.Add(new Label { Text = "Catégorie", Anchor = AnchorStyles.Right, AutoSize = true }, 0, 3);
             cmbCategory = new ComboBox
@@ -76,7 +80,8 @@ namespace TPI.AdminTabs
                 Margin = new Padding(10)
             };
             rightPanel.Controls.Add(cmbCategory, 1, 3);
-            var categories = Category.GetAllConsumables(); // Suppose que cette méthode existe pour obtenir les catégories
+
+            var categories = Category.GetAllConsumables();
             cmbCategory.DataSource = categories;
             cmbCategory.DisplayMember = "Name";
             cmbCategory.ValueMember = "Id";
@@ -111,6 +116,7 @@ namespace TPI.AdminTabs
             };
             btnDelete.Click += BtnDelete_Click;
             rightPanel.Controls.Add(btnDelete, 1, 6);
+
             mainLayout.Controls.Add(rightPanel, 1, 0);
         }
         private void LoadConsumables()
@@ -136,7 +142,7 @@ namespace TPI.AdminTabs
                 tblConsumables.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / headers.Length));
                 tblConsumables.RowCount++;
 
-                var lblModel = new Label { Text = cons.Model };
+                var lblModel = new Label { Text = cons.Model, AutoSize =  true };
                 var lblStock = new Label { Text = cons.Stock.ToString() };
                 var lblMinStock = new Label { Text = cons.MinStock.ToString() };
                 var lblCategory = new Label { Text = Category.GetById(cons.CategoryId).Name };
@@ -163,21 +169,30 @@ namespace TPI.AdminTabs
             {
                 selectedConsumable = cons;
                 txtModel.Text = cons.Model;
-                txtStock.Text = cons.Stock.ToString();
-                txtMinStock.Text = cons.MinStock.ToString();
+                nudStock.Value = cons.Stock;
+                nudMinStock.Value = cons.MinStock;
                 cmbCategory.SelectedValue = cons.CategoryId;
                 btnDelete.Enabled = true;
             }
         }
         private void BtnSave_Click(object sender, EventArgs e)
         {
+            if (cmbCategory.SelectedValue == null)
+            {
+                MessageBox.Show("Veuillez sélectionner une catégorie !");
+                return;
+            }
+
             int categoryId = (int)cmbCategory.SelectedValue;
 
             if (selectedConsumable == null)
             {
-                if (txtModel.Text != "" && txtStock.Text != "" && txtMinStock.Text != "" && cmbCategory.SelectedValue != null)
+                if (!string.IsNullOrWhiteSpace(txtModel.Text) &&
+                    nudStock.Value > 0 &&
+                    nudMinStock.Value >= 0)
                 {
-                    Consumable.Insert(txtModel.Text, int.Parse(txtStock.Text), int.Parse(txtMinStock.Text), categoryId);
+                    Consumable.Insert(txtModel.Text, (int)nudStock.Value, (int)nudMinStock.Value, categoryId);
+                    MessageBox.Show("Consommable ajouté avec succès !");
                 }
                 else
                 {
@@ -187,12 +202,12 @@ namespace TPI.AdminTabs
             }
             else
             {
-                Consumable.Update(selectedConsumable.Id, txtModel.Text, int.Parse(txtStock.Text), int.Parse(txtMinStock.Text), categoryId);
+                Consumable.Update(selectedConsumable.Id, txtModel.Text, (int)nudStock.Value, (int)nudMinStock.Value, categoryId);
+                MessageBox.Show("Consommable mis à jour !");
             }
-
             txtModel.Clear();
-            txtStock.Clear();
-            txtMinStock.Clear();
+            nudStock.Value = 0;
+            nudMinStock.Value = 0;
             cmbCategory.SelectedIndex = -1;
             btnSave.Enabled = false;
             btnDelete.Enabled = false;
@@ -202,9 +217,10 @@ namespace TPI.AdminTabs
         {
             selectedConsumable = null;
             txtModel.Clear();
-            txtStock.Clear();
-            txtMinStock.Clear();
+            nudStock.Value = 0;
+            nudMinStock.Value = 0;
             cmbCategory.SelectedIndex = -1;
+            btnDelete.Enabled = false;
         }
         private void BtnDelete_Click(object sender, EventArgs e)
         {
@@ -219,8 +235,8 @@ namespace TPI.AdminTabs
 
                 selectedConsumable = null;
                 txtModel.Clear();
-                txtStock.Clear();
-                txtMinStock.Clear();
+                nudStock.Value = 0;
+                nudMinStock.Value = 0;
                 cmbCategory.SelectedIndex = -1;
                 btnDelete.Enabled = false;
 

@@ -67,7 +67,9 @@ namespace TPI
             content.Dock = DockStyle.Fill;
             newTab.Controls.Add(content);
             tabMain.TabPages.Add(newTab);
+            tabMain.SelectedTab = newTab;
         }
+
         private void TabMain_SelectedIndexChanged(object sender, EventArgs e)
         {
             var selectedTab = tabMain.SelectedTab;
@@ -75,11 +77,14 @@ namespace TPI
 
             if (tabFactories.TryGetValue(title, out var factory))
             {
-                selectedTab.Controls.Clear();
-                var newControl = factory();
-                newControl.Dock = DockStyle.Fill;
-                selectedTab.Controls.Add(newControl);
+                if (selectedTab.Controls.Count == 0)
+                {
+                    var newControl = factory();
+                    newControl.Dock = DockStyle.Fill;
+                    selectedTab.Controls.Add(newControl);
+                }
             }
         }
+
     }
 }
