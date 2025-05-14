@@ -146,11 +146,17 @@ namespace TPI
                 return;
             }
             string resultMessage = User.RegisterUser(prenom, nom, email, motDePasse);
-
-            frmconnection frmconnection = new frmconnection();
-            frmconnection.Show();
-            this.Hide();
-            frmconnection.FormClosed += (s, args) => this.Close();
+            if(User.RegisterUser(prenom, nom, email, motDePasse) == "Utilisateur inscrit avec succès !")
+            {
+                frmconnection frmconnection = new frmconnection();
+                frmconnection.Show();
+                this.Hide();
+                frmconnection.FormClosed += (s, args) => this.Close();
+            }
+            else
+            {
+                MessageBox.Show(User.RegisterUser(prenom, nom, email, motDePasse));
+            }
         }
     }
 }

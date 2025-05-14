@@ -89,7 +89,7 @@ namespace TPI.AdminTabs
                 DropDownStyle = ComboBoxStyle.DropDownList,
                 Width = 200
             };
-            cmbRole.Items.Add("admin");
+            cmbRole.Items.Add("administrateur");
             cmbRole.Items.Add("client");
             rightPanel.Controls.Add(cmbRole, 1, 3);
 

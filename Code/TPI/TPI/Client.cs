@@ -337,7 +337,15 @@ namespace TPI
                     if (selectedConsumable != null)
                     {
                         nudQuantity.Maximum = selectedConsumable.Stock;
-                        nudQuantity.Value = Math.Min(1, selectedConsumable.Stock);
+                        if (selectedConsumable.Stock == 0)
+                        {
+                            nudQuantity.Enabled = false;
+                            btnAddToCart.Enabled = false;
+                        }
+                        else
+                        {
+                            nudQuantity.Value = Math.Min(1, selectedConsumable.Stock);
+                        }
                     }
                 }
             };
@@ -361,7 +369,9 @@ namespace TPI
 
                     cmbModelCons.SelectedIndex = -1;
                     cmbCategoryCons.SelectedIndex = -1;
+                    nudQuantity.Minimum = 1;
                     nudQuantity.Value = 1;
+
                 }
                 else
                 {

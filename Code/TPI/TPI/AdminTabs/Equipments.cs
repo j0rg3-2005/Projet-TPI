@@ -150,7 +150,7 @@ namespace TPI.AdminTabs
             {
                 tblEquipments.RowCount++;
 
-                var lblModel = new Label { Text = eq.Model };
+                var lblModel = new Label { Text = eq.Model , AutoSize = true};
                 var lblInv = new Label { Text = eq.InventoryNumber };
                 var lblAvail = new Label { Text = eq.Available ? "Oui" : "Non" };
                 var lblSerial = new Label { Text = eq.SerialNumber };

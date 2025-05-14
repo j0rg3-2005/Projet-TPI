@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Configuration;
 using MySqlConnector;
-
 namespace TPI
 {
     internal static class Program
@@ -13,7 +12,6 @@ namespace TPI
             var config = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
-
             var server = config["Database:Server"];
             var database = config["Database:Database"];
             var username = config["Database:Username"];
@@ -21,8 +19,16 @@ namespace TPI
 
             string constring = $"SERVER={server};DATABASE={database};UID={username};PASSWORD={password};";
             conn = new MySqlConnection(constring);
-            conn.Open();
 
+            try
+            {
+                conn.Open();
+            }
+            catch (MySqlException ex)
+            {
+                MessageBox.Show($"Erreur de connexion à la base de données :\n\n{ex.Message}\n\n Veuillez contacter votre administrateur IT.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
             ApplicationConfiguration.Initialize();
             Application.Run(new frmconnection());
         }
